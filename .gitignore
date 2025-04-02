@@ -1,0 +1,12 @@
+# PlatformIO build artifacts and other stuff
+.pio
+.vscode/
+.DS_Store
+
+# Firmware binary outputs
+*.bin
+*.elf
+*.hex
+
+# Secrets
+include/credentials.h
