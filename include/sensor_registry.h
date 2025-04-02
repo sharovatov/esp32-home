@@ -1,13 +1,15 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <memory>
+#include "isensor.h"
 
 class SensorRegistry
 {
-public:
-    std::vector<std::string> list() const;
-    void add(const std::string &sensor);
-
 private:
-    std::vector<std::string> sensors;
+    std::vector<std::shared_ptr<ISensor>> sensors;
+
+public:
+    void add(std::shared_ptr<ISensor> sensor);
+    std::vector<std::string> listNames() const;
 };
