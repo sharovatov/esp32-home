@@ -2,5 +2,10 @@
 
 std::vector<std::string> SensorRegistry::list() const
 {
-    return {"camera", "temp", "humidity"};
+    return sensors;
+}
+
+void SensorRegistry::add(const std::string &sensor)
+{
+    sensors.push_back(sensor);
 }
