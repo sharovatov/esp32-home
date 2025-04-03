@@ -135,6 +135,19 @@ void test_invalid_mqtt_topic_publishes_error()
     TEST_ASSERT_EQUAL_STRING(("invalid_topic:" + invalidTopic).c_str(), mqtt.lastMessage.c_str());
 }
 
+// routing should also fail for the correct request but no sensor name
+void test_empty_sensor_name_publishes_error()
+{
+    SensorRegistry registry;
+    FakeMqttClient mqtt;
+
+    std::string emptySensorTopic = "esp32/request/";
+    dispatchMqttRequest(emptySensorTopic, registry, mqtt);
+
+    TEST_ASSERT_EQUAL_STRING("esp32/response/error", mqtt.lastTopic.c_str());
+    TEST_ASSERT_EQUAL_STRING("sensor_unknown:", mqtt.lastMessage.c_str());
+}
+
 int main()
 {
     UNITY_BEGIN();
@@ -145,6 +158,7 @@ int main()
     RUN_TEST(test_unknown_sensor_publishes_error);
     RUN_TEST(test_request_topic_dispatches_to_sensor);
     RUN_TEST(test_invalid_mqtt_topic_publishes_error);
+    RUN_TEST(test_empty_sensor_name_publishes_error);
 
     return UNITY_END();
 }
