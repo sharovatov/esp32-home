@@ -11,6 +11,9 @@
 #include "mqtt_dispatcher.h"
 #include "../../src/mqtt_dispatcher.cpp"
 
+#include "boot.h"
+#include "../../src/boot.cpp"
+
 // sensor test double
 class DummySensor : public ISensor
 {
@@ -148,6 +151,24 @@ void test_empty_sensor_name_publishes_error()
     TEST_ASSERT_EQUAL_STRING("sensor_unknown:", mqtt.lastMessage.c_str());
 }
 
+// bootSystem function should register all sensors in the registry and publish them to mqtt
+void test_boot_system_registers_and_publishes_sensors()
+{
+    SensorRegistry registry;
+    FakeMqttClient mqtt;
+
+    std::vector<std::shared_ptr<ISensor>> sensors = {
+        std::make_shared<DummySensor>("camera", "dummy"),
+        std::make_shared<DummySensor>("temp", "dummy"),
+        std::make_shared<DummySensor>("humidity", "dummy"),
+    };
+
+    bootSystem(sensors, registry, mqtt);
+
+    TEST_ASSERT_EQUAL_STRING("esp32/available_sensors", mqtt.lastTopic.c_str());
+    TEST_ASSERT_EQUAL_STRING("[\"camera\",\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
+}
+
 int main()
 {
     UNITY_BEGIN();
@@ -159,6 +180,7 @@ int main()
     RUN_TEST(test_request_topic_dispatches_to_sensor);
     RUN_TEST(test_invalid_mqtt_topic_publishes_error);
     RUN_TEST(test_empty_sensor_name_publishes_error);
+    RUN_TEST(test_boot_system_registers_and_publishes_sensors);
 
     return UNITY_END();
 }
