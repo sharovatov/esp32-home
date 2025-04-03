@@ -4,10 +4,10 @@
 #include "sensor_registry.h"
 #include "isensor.h"
 #include "../../src/sensor_registry.cpp"
+#include "sensor_request_handler.h"
+#include "../../src/sensor_request_handler.cpp"
 
-/*
-  sensor test double
-*/
+// sensor test double
 class DummySensor : public ISensor
 {
 public:
@@ -42,11 +42,11 @@ void test_registry_returns_available_sensor_names()
     TEST_ASSERT_EQUAL_STRING("humidity", names[2].c_str());
 }
 
-// simplest MqttClient test double (mimicks mosquitto well enough)
-class FakeMqttClient
+// MqttClient test double (mimicks mosquitto well enough)
+class FakeMqttClient : public MqttClient
 {
 public:
-    void publish(const std::string &topic, const std::string &message)
+    void publish(const std::string &topic, const std::string &message) override
     {
         lastTopic = topic;
         lastMessage = message;
@@ -86,27 +86,6 @@ void test_publishes_available_sensor_names_to_mqtt()
 
     TEST_ASSERT_EQUAL_STRING("esp32/available_sensors", mqtt.lastTopic.c_str());
     TEST_ASSERT_EQUAL_STRING("[\"camera\",\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
-}
-
-// if the requested sensor is found on the registry, its readings should be published to mqtt
-// if the sensor isn't found, corresponding error is published to mqtt
-void handleSensorRequest(const std::string &sensorName, const SensorRegistry &registry, FakeMqttClient &mqtt)
-{
-    auto sensors = registry.list();
-
-    for (const auto &sensor : sensors)
-    {
-        if (sensor->name() == sensorName)
-        {
-            std::string result = sensor->read();
-            std::string topic = "esp32/response/" + sensorName;
-            mqtt.publish(topic, result);
-            return;
-        }
-    }
-
-    std::string errorMessage = "sensor_unknown:" + sensorName;
-    mqtt.publish("esp32/response/error", errorMessage);
 }
 
 // if a request comes in for a sensor that does not exist in the registry,
