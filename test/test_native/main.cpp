@@ -14,6 +14,9 @@
 #include "boot.h"
 #include "../../src/boot.cpp"
 
+#include "wifi_manager.h"
+#include "../../src/wifi_manager.cpp"
+
 // sensor test double
 class DummySensor : public ISensor
 {
@@ -151,6 +154,8 @@ void test_empty_sensor_name_publishes_error()
     TEST_ASSERT_EQUAL_STRING("sensor_unknown:", mqtt.lastMessage.c_str());
 }
 
+// =============== boot ===============
+
 // bootSystem function should register all sensors in the registry and publish them to mqtt
 void test_boot_system_registers_and_publishes_sensors()
 {
@@ -169,6 +174,53 @@ void test_boot_system_registers_and_publishes_sensors()
     TEST_ASSERT_EQUAL_STRING("[\"camera\",\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
 }
 
+// =============== wifi ===============
+
+// wifi test double
+class FakeWiFiManager : public WiFiManager
+{
+public:
+    bool connectCalled = false;
+    int attempts = 0;
+    bool simulateConnectionSuccess = true;
+
+    bool connect(const char *ssid, const char *password) override
+    {
+        connectCalled = true;
+        attempts++;
+        return simulateConnectionSuccess;
+    }
+
+    bool isConnected() override
+    {
+        return simulateConnectionSuccess;
+    }
+};
+
+// check that the connection can succeed
+void test_wifi_connection_succeeds_on_first_attempt()
+{
+    FakeWiFiManager wifi;
+    wifi.simulateConnectionSuccess = true;
+
+    bool result = tryConnectWithRetry(wifi, "testssid", "testpwd");
+
+    TEST_ASSERT_TRUE(result);
+    TEST_ASSERT_EQUAL(1, wifi.attempts);
+}
+
+// test that retries are supported and the connection fails after the limit is reached
+void test_wifi_connection_retries_and_fails_after_3_attempts()
+{
+    FakeWiFiManager wifi;
+    wifi.simulateConnectionSuccess = false;
+
+    bool result = tryConnectWithRetry(wifi, "testssid", "testpwd");
+
+    TEST_ASSERT_FALSE(result);
+    TEST_ASSERT_EQUAL(3, wifi.attempts);
+}
+
 int main()
 {
     UNITY_BEGIN();
@@ -181,6 +233,8 @@ int main()
     RUN_TEST(test_invalid_mqtt_topic_publishes_error);
     RUN_TEST(test_empty_sensor_name_publishes_error);
     RUN_TEST(test_boot_system_registers_and_publishes_sensors);
+    RUN_TEST(test_wifi_connection_succeeds_on_first_attempt);
+    RUN_TEST(test_wifi_connection_retries_and_fails_after_3_attempts);
 
     return UNITY_END();
 }
