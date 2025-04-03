@@ -8,6 +8,8 @@
 #include "../../src/sensor_request_handler.cpp"
 #include "sensor_publisher.h"
 #include "../../src/sensor_publisher.cpp"
+#include "mqtt_dispatcher.h"
+#include "../../src/mqtt_dispatcher.cpp"
 
 // sensor test double
 class DummySensor : public ISensor
@@ -91,7 +93,7 @@ void test_unknown_sensor_publishes_error()
     TEST_ASSERT_EQUAL_STRING(expectedErrorMsg.c_str(), mqtt.lastMessage.c_str());
 }
 
-// sensors should be able to respond to requests, starting off with camera
+// sensors should be able to respond to requests correctly with the readings
 void test_sensor_request_is_routed_and_published()
 {
     SensorRegistry registry;
@@ -105,6 +107,34 @@ void test_sensor_request_is_routed_and_published()
     TEST_ASSERT_EQUAL_STRING("imagebytes", mqtt.lastMessage.c_str());
 }
 
+// requests routing should work correctly, a message published to esp32/request/temp
+// should route to the temp sensor
+void test_request_topic_dispatches_to_sensor()
+{
+    SensorRegistry registry;
+    registry.add(std::make_shared<DummySensor>("temp", "22.5"));
+
+    FakeMqttClient mqtt;
+
+    dispatchMqttRequest("esp32/request/temp", registry, mqtt);
+
+    TEST_ASSERT_EQUAL_STRING("esp32/response/temp", mqtt.lastTopic.c_str());
+    TEST_ASSERT_EQUAL_STRING("22.5", mqtt.lastMessage.c_str());
+}
+
+// request routing should fail gracefully by publishing an error if the request is invalid
+void test_invalid_mqtt_topic_publishes_error()
+{
+    SensorRegistry registry;
+    FakeMqttClient mqtt;
+
+    std::string invalidTopic = "bad/request/temp";
+    dispatchMqttRequest(invalidTopic, registry, mqtt);
+
+    TEST_ASSERT_EQUAL_STRING("esp32/response/error", mqtt.lastTopic.c_str());
+    TEST_ASSERT_EQUAL_STRING(("invalid_topic:" + invalidTopic).c_str(), mqtt.lastMessage.c_str());
+}
+
 int main()
 {
     UNITY_BEGIN();
@@ -113,6 +143,8 @@ int main()
     RUN_TEST(test_publishes_available_sensor_names_to_mqtt);
     RUN_TEST(test_sensor_request_is_routed_and_published);
     RUN_TEST(test_unknown_sensor_publishes_error);
+    RUN_TEST(test_request_topic_dispatches_to_sensor);
+    RUN_TEST(test_invalid_mqtt_topic_publishes_error);
 
     return UNITY_END();
 }
