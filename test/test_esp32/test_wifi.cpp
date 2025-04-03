@@ -5,26 +5,9 @@
 #include "../../src/wifi_manager.cpp"
 #include "credentials.h"
 
-class RealWiFiManager : public WiFiManager
-{
-public:
-    bool connect(const char *ssid, const char *password) override
-    {
-        WiFi.begin(ssid, password);
-        int retries = 0;
-        while (WiFi.status() != WL_CONNECTED && retries < 10)
-        {
-            delay(1000);
-            retries++;
-        }
-        return WiFi.status() == WL_CONNECTED;
-    }
-
-    bool isConnected() override
-    {
-        return WiFi.status() == WL_CONNECTED;
-    }
-};
+// drivers
+#include "wifi_manager_esp.h"
+#include "../../src/wifi_manager_esp.cpp"
 
 void test_wifi_connects_successfully()
 {
@@ -35,14 +18,16 @@ void test_wifi_connects_successfully()
 
 void setup()
 {
-    // This runs once when the test starts
     delay(2000); // wait for serial monitor to connect
     UNITY_BEGIN();
     RUN_TEST(test_wifi_connects_successfully);
     UNITY_END();
+
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
 }
 
 void loop()
 {
-    // Leave empty
+    // empty for now
 }
