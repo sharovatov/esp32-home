@@ -14,3 +14,8 @@ std::vector<std::string> SensorRegistry::listNames() const
     }
     return names;
 }
+
+std::vector<std::shared_ptr<ISensor>> SensorRegistry::list() const
+{
+    return sensors;
+}

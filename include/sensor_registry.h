@@ -12,4 +12,5 @@ private:
 public:
     void add(std::shared_ptr<ISensor> sensor);
     std::vector<std::string> listNames() const;
+    std::vector<std::shared_ptr<ISensor>> list() const;
 };
