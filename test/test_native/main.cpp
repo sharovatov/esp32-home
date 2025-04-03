@@ -6,6 +6,8 @@
 #include "../../src/sensor_registry.cpp"
 #include "sensor_request_handler.h"
 #include "../../src/sensor_request_handler.cpp"
+#include "sensor_publisher.h"
+#include "../../src/sensor_publisher.cpp"
 
 // sensor test double
 class DummySensor : public ISensor
@@ -42,7 +44,7 @@ void test_registry_returns_available_sensor_names()
     TEST_ASSERT_EQUAL_STRING("humidity", names[2].c_str());
 }
 
-// MqttClient test double (mimicks mosquitto well enough)
+// mqttclient test double
 class FakeMqttClient : public MqttClient
 {
 public:
@@ -55,23 +57,6 @@ public:
     std::string lastTopic;
     std::string lastMessage;
 };
-
-// publishes to esp32/available_sensors a string like ["camera","temp","humidity"]
-void publishAvailableSensors(const SensorRegistry &registry, FakeMqttClient &mqtt)
-{
-    auto names = registry.listNames();
-
-    std::string result = "[";
-    for (size_t i = 0; i < names.size(); ++i)
-    {
-        result += "\"" + names[i] + "\"";
-        if (i < names.size() - 1)
-            result += ",";
-    }
-    result += "]";
-
-    mqtt.publish("esp32/available_sensors", result);
-}
 
 // all sensors from the registry should be publisheable to mqtt
 void test_publishes_available_sensor_names_to_mqtt()
