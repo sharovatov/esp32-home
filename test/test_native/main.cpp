@@ -42,11 +42,58 @@ void test_registry_returns_available_sensor_names()
     TEST_ASSERT_EQUAL_STRING("humidity", names[2].c_str());
 }
 
+// simplest MqttClient test double (mimicks mosquitto well enough)
+class FakeMqttClient
+{
+public:
+    void publish(const std::string &topic, const std::string &message)
+    {
+        lastTopic = topic;
+        lastMessage = message;
+    }
+
+    std::string lastTopic;
+    std::string lastMessage;
+};
+
+// publishes to esp32/available_sensors a string like ["camera","temp","humidity"]
+void publishAvailableSensors(const SensorRegistry &registry, FakeMqttClient &mqtt)
+{
+    auto names = registry.listNames();
+
+    std::string result = "[";
+    for (size_t i = 0; i < names.size(); ++i)
+    {
+        result += "\"" + names[i] + "\"";
+        if (i < names.size() - 1)
+            result += ",";
+    }
+    result += "]";
+
+    mqtt.publish("esp32/available_sensors", result);
+}
+
+// all sensors from the registry should be publisheable to mqtt
+void test_publishes_available_sensor_names_to_mqtt()
+{
+    SensorRegistry registry;
+    registry.add(std::make_shared<DummySensor>("camera", ""));
+    registry.add(std::make_shared<DummySensor>("temp", ""));
+    registry.add(std::make_shared<DummySensor>("humidity", ""));
+
+    FakeMqttClient mqtt;
+    publishAvailableSensors(registry, mqtt);
+
+    TEST_ASSERT_EQUAL_STRING("esp32/available_sensors", mqtt.lastTopic.c_str());
+    TEST_ASSERT_EQUAL_STRING("[\"camera\",\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
+}
+
 int main()
 {
     UNITY_BEGIN();
 
     RUN_TEST(test_registry_returns_available_sensor_names);
+    RUN_TEST(test_publishes_available_sensor_names_to_mqtt);
 
     return UNITY_END();
 }
