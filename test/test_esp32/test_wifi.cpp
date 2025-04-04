@@ -3,9 +3,11 @@
 #include <WiFi.h>
 #include "wifi_manager.h"
 #include "../../src/wifi_manager.cpp"
+
+// all the pwds
 #include "credentials.h"
 
-// drivers
+// my wifi drivers
 #include "wifi_manager_esp.h"
 #include "../../src/wifi_manager_esp.cpp"
 
