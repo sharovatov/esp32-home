@@ -1,6 +1,7 @@
 #include <unity.h>
 #include <vector>
 #include <string>
+
 #include "sensor_registry.h"
 #include "isensor.h"
 #include "../../src/sensor_registry.cpp"
@@ -8,6 +9,8 @@
 #include "../../src/sensor_request_handler.cpp"
 #include "sensor_publisher.h"
 #include "../../src/sensor_publisher.cpp"
+
+#include "fake_mqtt_client.h"
 #include "mqtt_dispatcher.h"
 #include "../../src/mqtt_dispatcher.cpp"
 
@@ -51,20 +54,6 @@ void test_registry_returns_available_sensor_names()
     TEST_ASSERT_EQUAL_STRING("temp", names[1].c_str());
     TEST_ASSERT_EQUAL_STRING("humidity", names[2].c_str());
 }
-
-// mqttclient test double
-class FakeMqttClient : public MqttClient
-{
-public:
-    void publish(const std::string &topic, const std::string &message) override
-    {
-        lastTopic = topic;
-        lastMessage = message;
-    }
-
-    std::string lastTopic;
-    std::string lastMessage;
-};
 
 // all sensors from the registry should be publisheable to mqtt
 void test_publishes_available_sensor_names_to_mqtt()
