@@ -1,15 +1,12 @@
 #include <Arduino.h>
 #include <unity.h>
-#include <WiFi.h>
-#include "wifi/wifi_manager.h"
-// #include "../../src/wifi_manager.cpp"
 
 // all the pwds
 #include "credentials.h"
 
-// my wifi drivers
+#include <WiFi.h>
+#include "wifi/wifi_manager.h"
 #include "wifi_manager_esp.h"
-// #include "../../src/wifi_manager_esp.cpp"
 
 void test_wifi_connects_successfully()
 {
