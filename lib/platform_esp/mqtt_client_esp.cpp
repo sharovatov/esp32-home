@@ -1,14 +1,14 @@
 #include "mqtt_client_esp.h"
 
 RealMqttClient::RealMqttClient(Client &wifiClient, const char *host, uint16_t port)
+    : client(wifiClient)
 {
-    client.setClient(wifiClient);
     client.setServer(host, port);
 }
 
-bool RealMqttClient::connect(const char *clientId)
+bool RealMqttClient::connect(const char *clientId, const char *username, const char *password)
 {
-    return client.connect(clientId);
+    return client.connect(clientId, username, password);
 }
 
 void RealMqttClient::publish(const std::string &topic, const std::string &message)
