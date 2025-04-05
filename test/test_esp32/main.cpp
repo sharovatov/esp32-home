@@ -9,6 +9,9 @@
 #include "mqtt_client_esp.h"
 
 #include "dht_sensor_esp.h"
+#define DHTPIN 33
+#include "temperature_sensor_esp.h"
+#include "humidity_sensor_esp.h"
 
 WiFiClient wifiClient;
 bool mqttMessageReceived = false;
@@ -92,22 +95,28 @@ void test_mqtt_publish_and_receive()
     cleanUp();
 }
 
-void test_dht_sensor_reads_values()
+// test dht11 for real readings
+void test_temperature_sensor_reads_value()
 {
-    // GPIO 27 used as an example
-    DhtSensor sensor(33, DHT11, "temp_humidity");
-
-    std::string reading = sensor.read();
-    Serial.println(("DHT Reading: " + reading).c_str());
-
-    TEST_ASSERT_FALSE_MESSAGE(reading == "error", "DHT sensor returned 'error'");
+    TemperatureSensor sensor(DHTPIN, DHT11, "temp");
+    auto reading = sensor.read();
+    TEST_ASSERT_TRUE_MESSAGE(strcmp("error", reading.c_str()) != 0, "TemperatureSensor returned 'error'");
+}
+void test_humidity_sensor_reads_value()
+{
+    HumiditySensor sensor(DHTPIN, DHT11, "humidity");
+    auto reading = sensor.read();
+    Serial.print("Humidity reading: ");
+    Serial.println(reading.c_str());
+    TEST_ASSERT_TRUE_MESSAGE(strcmp("error", reading.c_str()) != 0, "HumiditySensor returned 'error'");
 }
 
 void setup()
 {
     delay(2000); // Wait for serial monitor to connect
     UNITY_BEGIN();
-    RUN_TEST(test_dht_sensor_reads_values);
+    RUN_TEST(test_temperature_sensor_reads_value);
+    RUN_TEST(test_humidity_sensor_reads_value);
     RUN_TEST(test_wifi_connects_successfully);
     RUN_TEST(test_mqtt_publish_and_receive);
 
