@@ -122,6 +122,17 @@ void test_empty_sensor_name_publishes_error()
     TEST_ASSERT_EQUAL_STRING("sensor_unknown:", mqtt.lastMessage.c_str());
 }
 
+// test pwd/usrname working ok
+// I know I'm only testing the fake, but this makes me not forget the pwd and usrname handling
+void test_mqtt_connect_saves_credentials()
+{
+    FakeMqttClient mqtt;
+    mqtt.connect("myClient", "testuser", "testpass");
+
+    TEST_ASSERT_EQUAL_STRING("myClient", mqtt.receivedClientId.c_str());
+    TEST_ASSERT_EQUAL_STRING("testuser", mqtt.receivedUsername.c_str());
+    TEST_ASSERT_EQUAL_STRING("testpass", mqtt.receivedPassword.c_str());
+}
 // =============== boot ===============
 
 // bootSystem function should register all sensors in the registry and publish them to mqtt
@@ -182,6 +193,7 @@ int main()
     RUN_TEST(test_boot_system_registers_and_publishes_sensors);
     RUN_TEST(test_wifi_connection_succeeds_on_first_attempt);
     RUN_TEST(test_wifi_connection_retries_and_fails_after_3_attempts);
+    RUN_TEST(test_mqtt_connect_saves_credentials);
 
     return UNITY_END();
 }

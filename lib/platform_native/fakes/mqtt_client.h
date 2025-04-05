@@ -1,11 +1,26 @@
 #pragma once
-
 #include "mqtt/mqtt_client.h"
 #include <string>
 
 class FakeMqttClient : public MqttClient
 {
 public:
+    std::string lastTopic;
+    std::string lastMessage;
+    std::string subscribedTopic;
+    std::string receivedClientId;
+    std::string receivedUsername;
+    std::string receivedPassword;
+    void (*callback)(char *, uint8_t *, unsigned int) = nullptr;
+
+    bool connect(const char *clientId, const char *username, const char *password) override
+    {
+        receivedClientId = clientId;
+        receivedUsername = username;
+        receivedPassword = password;
+        return true;
+    }
+
     void publish(const std::string &topic, const std::string &message) override
     {
         lastTopic = topic;
@@ -14,24 +29,16 @@ public:
 
     void subscribe(const std::string &topic) override
     {
-        // No-op for now
+        subscribedTopic = topic;
     }
 
-    void setCallback(void (*callback)(char *, uint8_t *, unsigned int)) override
+    void setCallback(void (*cb)(char *, uint8_t *, unsigned int)) override
     {
-        // No-op for now
+        callback = cb;
     }
 
     void loop() override
     {
-        // No-op for now
+        // optional: simulate MQTT loop behaviour
     }
-
-    bool connect(const char *clientId) override
-    {
-        return true; // Assume always connected for test double
-    }
-
-    std::string lastTopic;
-    std::string lastMessage;
 };
