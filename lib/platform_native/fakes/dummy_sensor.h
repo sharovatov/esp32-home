@@ -5,7 +5,7 @@ public:
         : sensorName(sensorName), result(result) {}
 
     std::string name() const override { return sensorName; }
-    std::string read() const override { return result; }
+    std::string read() override { return result; }
 
 private:
     std::string sensorName;

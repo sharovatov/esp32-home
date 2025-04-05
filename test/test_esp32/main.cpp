@@ -8,6 +8,8 @@
 #include "mqtt/mqtt_client.h"
 #include "mqtt_client_esp.h"
 
+#include "dht_sensor_esp.h"
+
 WiFiClient wifiClient;
 bool mqttMessageReceived = false;
 String mqttReceivedTopic;
@@ -90,12 +92,25 @@ void test_mqtt_publish_and_receive()
     cleanUp();
 }
 
+void test_dht_sensor_reads_values()
+{
+    // GPIO 27 used as an example
+    DhtSensor sensor(33, DHT11, "temp_humidity");
+
+    std::string reading = sensor.read();
+    Serial.println(("DHT Reading: " + reading).c_str());
+
+    TEST_ASSERT_FALSE_MESSAGE(reading == "error", "DHT sensor returned 'error'");
+}
+
 void setup()
 {
     delay(2000); // Wait for serial monitor to connect
     UNITY_BEGIN();
+    RUN_TEST(test_dht_sensor_reads_values);
     RUN_TEST(test_wifi_connects_successfully);
     RUN_TEST(test_mqtt_publish_and_receive);
+
     UNITY_END();
 }
 

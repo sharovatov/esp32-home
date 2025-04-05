@@ -10,6 +10,11 @@
 #include "fakes/mqtt_client.h"
 #include "fakes/dummy_sensor.h"
 #include "fakes/wifi_manager.h"
+#include "fakes/dht_sensor.h"
+
+#include "sensor/temperature_sensor.h"
+#include "sensor/humidity_sensor.h"
+
 #include "mqtt/mqtt_dispatcher.h"
 
 #include "boot/boot.h"
@@ -179,6 +184,54 @@ void test_wifi_connection_retries_and_fails_after_3_attempts()
     TEST_ASSERT_EQUAL(3, wifi.attempts);
 }
 
+// =============== dht (temp & humidity) ===============
+
+// yeah I know I'm testing a test double so what?
+void test_dht_sensor_returns_stubbed_data()
+{
+    DhtSensorFake sensor("temp_hum", "22.5,45");
+    TEST_ASSERT_EQUAL_STRING("temp_hum", sensor.name().c_str());
+    TEST_ASSERT_EQUAL_STRING("22.5,45", sensor.read().c_str());
+}
+
+// boot should work with any sensor
+void test_boot_registers_and_publishes_dht_sensor()
+{
+    SensorRegistry registry;
+    FakeMqttClient mqtt;
+
+    std::vector<std::shared_ptr<ISensor>> sensors = {
+        std::make_shared<DummySensor>("temp", "22.5"),
+        std::make_shared<DummySensor>("humidity", "45")};
+
+    bootSystem(sensors, registry, mqtt);
+
+    TEST_ASSERT_EQUAL_STRING("esp32/available_sensors", mqtt.lastTopic.c_str());
+    TEST_ASSERT_EQUAL_STRING("[\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
+
+    auto names = registry.listNames();
+    TEST_ASSERT_EQUAL(2, names.size());
+    TEST_ASSERT_EQUAL_STRING("temp", names[0].c_str());
+    TEST_ASSERT_EQUAL_STRING("humidity", names[1].c_str());
+}
+
+// boot should also register and publish real temperature and humidity sensors (even though they are one dht)
+void test_boot_registers_and_publishes_real_sensors()
+{
+    SensorRegistry registry;
+    FakeMqttClient mqtt;
+
+    std::vector<std::shared_ptr<ISensor>> sensors = {
+        std::make_shared<TemperatureSensor>(),
+        std::make_shared<HumiditySensor>(),
+    };
+
+    bootSystem(sensors, registry, mqtt);
+
+    TEST_ASSERT_EQUAL_STRING("esp32/available_sensors", mqtt.lastTopic.c_str());
+    TEST_ASSERT_EQUAL_STRING("[\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
+}
+
 int main()
 {
     UNITY_BEGIN();
@@ -194,6 +247,9 @@ int main()
     RUN_TEST(test_wifi_connection_succeeds_on_first_attempt);
     RUN_TEST(test_wifi_connection_retries_and_fails_after_3_attempts);
     RUN_TEST(test_mqtt_connect_saves_credentials);
+    RUN_TEST(test_dht_sensor_returns_stubbed_data);
+    RUN_TEST(test_boot_registers_and_publishes_dht_sensor);
+    RUN_TEST(test_boot_registers_and_publishes_real_sensors);
 
     return UNITY_END();
 }
