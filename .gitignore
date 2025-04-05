@@ -10,3 +10,10 @@
 
 # Secrets
 include/credentials.h
+
+# Python stuff
+__pycache__/
+*.py[cod]
+
+# generated sensors file
+/static/sensors.js
