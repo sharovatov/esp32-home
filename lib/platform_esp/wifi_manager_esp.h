@@ -1,5 +1,5 @@
 #pragma once
-#include "wifi_manager.h"
+#include "wifi/wifi_manager.h"
 
 // Concrete implementation for ESP-based WiFiManager
 class RealWiFiManager : public WiFiManager

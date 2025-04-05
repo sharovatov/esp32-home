@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <unity.h>
 #include <WiFi.h>
-#include "wifi_manager.h"
-#include "../../src/wifi_manager.cpp"
+#include "wifi/wifi_manager.h"
+// #include "../../src/wifi_manager.cpp"
 
 // all the pwds
 #include "credentials.h"
