@@ -2,38 +2,17 @@
 #include <vector>
 #include <string>
 
-#include "sensor_registry.h"
-#include "isensor.h"
-#include "../../src/sensor_registry.cpp"
-#include "sensor_request_handler.h"
-#include "../../src/sensor_request_handler.cpp"
-#include "sensor_publisher.h"
-#include "../../src/sensor_publisher.cpp"
+#include "sensor/sensor_registry.h"
+#include "sensor/isensor.h"
+#include "sensor/sensor_request_handler.h"
+#include "sensor/sensor_publisher.h"
 
-#include "fake_mqtt_client.h"
-#include "mqtt_dispatcher.h"
-#include "../../src/mqtt_dispatcher.cpp"
+#include "fakes/mqtt_client.h"
+#include "fakes/dummy_sensor.h"
+#include "fakes/wifi_manager.h"
+#include "mqtt/mqtt_dispatcher.h"
 
-#include "boot.h"
-#include "../../src/boot.cpp"
-
-#include "wifi_manager.h"
-#include "../../src/wifi_manager.cpp"
-
-// sensor test double
-class DummySensor : public ISensor
-{
-public:
-    DummySensor(std::string sensorName, std::string result)
-        : sensorName(sensorName), result(result) {}
-
-    std::string name() const override { return sensorName; }
-    std::string read() const override { return result; }
-
-private:
-    std::string sensorName;
-    std::string result;
-};
+#include "boot/boot.h"
 
 /*
   I want the sensors registry to be populated with all the physically present sensors,
@@ -164,27 +143,6 @@ void test_boot_system_registers_and_publishes_sensors()
 }
 
 // =============== wifi ===============
-
-// wifi test double
-class FakeWiFiManager : public WiFiManager
-{
-public:
-    bool connectCalled = false;
-    int attempts = 0;
-    bool simulateConnectionSuccess = true;
-
-    bool connect(const char *ssid, const char *password) override
-    {
-        connectCalled = true;
-        attempts++;
-        return simulateConnectionSuccess;
-    }
-
-    bool isConnected() override
-    {
-        return simulateConnectionSuccess;
-    }
-};
 
 // check that the connection can succeed
 void test_wifi_connection_succeeds_on_first_attempt()

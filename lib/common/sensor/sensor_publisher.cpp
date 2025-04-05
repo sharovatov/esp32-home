@@ -1,4 +1,4 @@
-#include "sensor_publisher.h"
+#include "sensor/sensor_publisher.h"
 
 void publishAvailableSensors(const SensorRegistry &registry, MqttClient &mqtt)
 {

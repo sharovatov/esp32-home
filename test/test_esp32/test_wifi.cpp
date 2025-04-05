@@ -9,7 +9,7 @@
 
 // my wifi drivers
 #include "wifi_manager_esp.h"
-#include "../../src/wifi_manager_esp.cpp"
+// #include "../../src/wifi_manager_esp.cpp"
 
 void test_wifi_connects_successfully()
 {

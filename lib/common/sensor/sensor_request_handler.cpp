@@ -1,4 +1,4 @@
-#include "sensor_request_handler.h"
+#include "sensor/sensor_request_handler.h"
 
 void handleSensorRequest(const std::string &sensorName, const SensorRegistry &registry, MqttClient &mqtt)
 {

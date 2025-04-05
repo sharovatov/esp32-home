@@ -1,7 +1,6 @@
-
 #pragma once
 
-#include "mqtt_client.h"
+#include "mqtt/mqtt_client.h"
 #include <string>
 
 class FakeMqttClient : public MqttClient

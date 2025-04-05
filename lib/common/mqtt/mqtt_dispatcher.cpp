@@ -1,4 +1,4 @@
-#include "mqtt_dispatcher.h"
+#include "mqtt/mqtt_dispatcher.h"
 
 void dispatchMqttRequest(const std::string &topic, const SensorRegistry &registry, MqttClient &mqtt)
 {

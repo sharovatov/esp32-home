@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include "isensor.h"
+#include "sensor/isensor.h"
 
 class SensorRegistry
 {

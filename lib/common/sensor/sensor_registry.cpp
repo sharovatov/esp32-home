@@ -1,4 +1,4 @@
-#include "sensor_registry.h"
+#include "sensor/sensor_registry.h"
 
 void SensorRegistry::add(std::shared_ptr<ISensor> sensor)
 {

@@ -1,5 +1,5 @@
-#include "boot.h"
-#include "sensor_publisher.h"
+#include "boot/boot.h"
+#include "sensor/sensor_publisher.h"
 
 void bootSystem(const std::vector<std::shared_ptr<ISensor>> &sensors,
                 SensorRegistry &registry,

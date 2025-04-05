@@ -1,4 +1,4 @@
-#include "wifi_manager.h"
+#include "wifi/wifi_manager.h"
 
 bool tryConnectWithRetry(WiFiManager &wifi, const char *ssid, const char *password, int maxAttempts)
 {
