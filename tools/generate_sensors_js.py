@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 def generate_js(sensors):
-    lines = ['// Auto-generated file', '', 'export const availableSensors = [']
+    lines = ['// Auto-generated file', '', 'const availableSensors = [']
     for s in sensors:
         lines.append(f'  "{s}",')
     lines.append('];')
