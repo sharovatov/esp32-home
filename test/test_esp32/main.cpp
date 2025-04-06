@@ -12,6 +12,7 @@
 #define DHTPIN 33
 #include "temperature_sensor_esp.h"
 #include "humidity_sensor_esp.h"
+#include <camera_sensor_esp.h>
 
 WiFiClient wifiClient;
 bool mqttMessageReceived = false;
@@ -113,6 +114,17 @@ void test_humidity_sensor_reads_value()
 
 // I'd love to do an integration test for the buzzer but the code can't listen lol
 
+// test the camera if it returns something like base64
+void test_camera_returns_base64_string()
+{
+    RealCameraSensor camera;
+    camera.init();
+    std::string image = camera.read();
+
+    TEST_ASSERT_FALSE_MESSAGE(image.empty(), "Camera returned empty string");
+    TEST_ASSERT_TRUE_MESSAGE(image.find("==") != std::string::npos, "Camera output does not look like base64");
+}
+
 void setup()
 {
     delay(2000); // Wait for serial monitor to connect
@@ -122,6 +134,7 @@ void setup()
     RUN_TEST(test_humidity_sensor_reads_value);
     RUN_TEST(test_wifi_connects_successfully);
     RUN_TEST(test_mqtt_publish_and_receive);
+    RUN_TEST(test_camera_returns_base64_string);
 
     UNITY_END();
 }

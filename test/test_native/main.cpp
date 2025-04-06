@@ -20,6 +20,8 @@
 
 #include "boot/boot.h"
 #include "fakes/buzzer_fake.h"
+#include <HWCDC.h>
+#include <HardwareSerial.h>
 
 /*
   I want the sensors registry to be populated with all the physically present sensors,
@@ -262,8 +264,14 @@ void test_camera_driver_returns_base64_image()
     // Basic sanity: must not be empty
     TEST_ASSERT_FALSE_MESSAGE(image.empty(), "Camera returned empty string");
 
-    // check that it looks like base64
-    TEST_ASSERT_TRUE_MESSAGE(image.find("==") != std::string::npos, "Camera output does not look like base64");
+    if (image.length() <= 10000)
+    {
+        Serial.print("Camera returned short output: ");
+        Serial.println(image.c_str());
+    }
+
+    // check that it's at least bit
+    TEST_ASSERT_TRUE_MESSAGE(image.length() > 10000, "Camera output too small to be a valid JPEG in base64");
 }
 
 void test_camera_read_fails_without_initialisation()
