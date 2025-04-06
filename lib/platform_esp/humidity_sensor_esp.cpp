@@ -18,5 +18,7 @@ std::string HumiditySensor::read()
     {
         return "error";
     }
-    return std::to_string(h);
+    char buffer[16];
+    snprintf(buffer, sizeof(buffer), "%.1f", h);
+    return std::string(buffer);
 }

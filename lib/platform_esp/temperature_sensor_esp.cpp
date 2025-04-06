@@ -18,5 +18,8 @@ std::string TemperatureSensor::read()
     {
         return "error";
     }
-    return std::to_string(t);
+
+    char buffer[16];
+    snprintf(buffer, sizeof(buffer), "%.1f", t);
+    return std::string(buffer);
 }

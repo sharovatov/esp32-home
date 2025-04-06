@@ -16,6 +16,10 @@
 #include "sensor/isensor.h"
 #include "buzzer_esp.cpp"
 
+#define DHTPIN 33
+#include "temperature_sensor_esp.h"
+#include "humidity_sensor_esp.h"
+
 // ========== Globals ==========
 WiFiClient wifiClient;
 RealMqttClient *mqtt = nullptr;
@@ -34,12 +38,13 @@ private:
   std::string value;
 };
 
-// ========== dummy sensors init  ==========
+// ========== sensors init  ==========
+// only camera is dummied now
 std::vector<std::shared_ptr<ISensor>> createSensors()
 {
   return {
-      std::make_shared<DummySensor>("temp", "23.4"),
-      std::make_shared<DummySensor>("humidity", "60"),
+      std::make_shared<TemperatureSensor>(DHTPIN, DHT11, "temp"),
+      std::make_shared<HumiditySensor>(DHTPIN, DHT11, "humidity"),
       std::make_shared<DummySensor>("camera",
                                     "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==")};
 }
