@@ -26,7 +26,7 @@ class DummySensor : public ISensor
 public:
   DummySensor(const std::string &n, const std::string &v) : sensorName(n), value(v) {}
   std::string name() const override { return sensorName; }
-  std::string read() const override { return value; }
+  std::string read() override { return value; }
 
 private:
   std::string sensorName;
