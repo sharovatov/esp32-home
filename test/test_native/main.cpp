@@ -11,6 +11,7 @@
 #include "fakes/dummy_sensor.h"
 #include "fakes/wifi_manager.h"
 #include "fakes/dht_sensor.h"
+#include "fakes/camera_sensor.h"
 
 #include "sensor/temperature_sensor.h"
 #include "sensor/humidity_sensor.h"
@@ -239,7 +240,6 @@ void test_boot_registers_and_publishes_real_sensors()
 }
 
 // =============== buzzer ===============
-
 void test_buzzer_buzzes_on_request()
 {
     SensorRegistry registry;
@@ -248,6 +248,30 @@ void test_buzzer_buzzes_on_request()
     dispatchMqttRequest("esp32/request/temp", registry, mqtt, buzzer);
 
     TEST_ASSERT_TRUE_MESSAGE(buzzer.buzzed, "Buzzer should buzz on any request");
+}
+
+// =============== camera ===============
+
+void test_camera_driver_returns_base64_image()
+{
+    FakeCameraSensor camera;
+    camera.init();
+
+    std::string image = camera.read();
+
+    // Basic sanity: must not be empty
+    TEST_ASSERT_FALSE_MESSAGE(image.empty(), "Camera returned empty string");
+
+    // check that it looks like base64
+    TEST_ASSERT_TRUE_MESSAGE(image.find("==") != std::string::npos, "Camera output does not look like base64");
+}
+
+void test_camera_read_fails_without_initialisation()
+{
+    FakeCameraSensor camera;
+    std::string image = camera.read();
+
+    TEST_ASSERT_EQUAL_STRING("error:not_initialized", image.c_str());
 }
 
 int main()
@@ -269,6 +293,8 @@ int main()
     RUN_TEST(test_boot_registers_and_publishes_dht_sensor);
     RUN_TEST(test_boot_registers_and_publishes_real_sensors);
     RUN_TEST(test_buzzer_buzzes_on_request);
+    RUN_TEST(test_camera_driver_returns_base64_image);
+    RUN_TEST(test_camera_read_fails_without_initialisation);
 
     return UNITY_END();
 }
