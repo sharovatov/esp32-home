@@ -34,6 +34,16 @@ private:
   std::string value;
 };
 
+// ========== dummy sensors init  ==========
+std::vector<std::shared_ptr<ISensor>> createSensors()
+{
+  return {
+      std::make_shared<DummySensor>("temp", "23.4"),
+      std::make_shared<DummySensor>("humidity", "60"),
+      std::make_shared<DummySensor>("camera",
+                                    "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==")};
+}
+
 // ========== MQTT Callback ==========
 void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
 {
@@ -44,7 +54,6 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
   dispatchMqttRequest(topicStr, registry, *mqtt, buzzer);
 }
 
-// ========== Setup ==========
 void setup()
 {
   Serial.begin(115200);
@@ -69,22 +78,14 @@ void setup()
     Serial.println("MQTT connection failed.");
     return;
   }
-  Serial.println("Connected to MQTT.");
 
-  // Subscribe to sensor request topic
+  Serial.println("Connected to MQTT.");
   mqtt->subscribe("esp32/request/+");
 
-  // Boot system (register sensors + publish available)
-  std::vector<std::shared_ptr<ISensor>> sensors = {
-      std::make_shared<DummySensor>("temp", "23.4"),
-      std::make_shared<DummySensor>("humidity", "60"),
-      std::make_shared<DummySensor>("camera",
-                                    "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==")};
-
-  bootSystem(sensors, registry, *mqtt);
+  bootSystem(createSensors(), registry, *mqtt);
 }
 
-// ========== Loop ==========
+// main loop
 void loop()
 {
   if (mqtt)
