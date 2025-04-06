@@ -1,8 +1,10 @@
 #include "mqtt/mqtt_dispatcher.h"
 
-void dispatchMqttRequest(const std::string &topic, const SensorRegistry &registry, MqttClient &mqtt)
+void dispatchMqttRequest(const std::string &topic, const SensorRegistry &registry, MqttClient &mqtt, IBuzzer &buzzer)
 {
     std::string prefix = "esp32/request/";
+
+    buzzer.buzz(); // buzzes on EVERY request even invalid
 
     // check to see if the topic is correct
     if (topic.rfind(prefix, 0) != 0)

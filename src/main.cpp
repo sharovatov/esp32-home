@@ -13,14 +13,15 @@
 #include "sensor/sensor_publisher.h"
 #include "boot/boot.h"
 
+#include "sensor/isensor.h"
+#include "buzzer_esp.cpp"
+
 // ========== Globals ==========
 WiFiClient wifiClient;
 RealMqttClient *mqtt = nullptr;
 SensorRegistry registry;
 
-// ========== Dummy Sensor ==========
-#include "sensor/isensor.h"
-
+// dummy sensor will only be used for some time here until it's not needed
 class DummySensor : public ISensor
 {
 public:
@@ -39,7 +40,8 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
   std::string topicStr(topic);
   std::string payloadStr(reinterpret_cast<char *>(payload), length);
 
-  dispatchMqttRequest(topicStr, registry, *mqtt);
+  Buzzer buzzer(14);
+  dispatchMqttRequest(topicStr, registry, *mqtt, buzzer);
 }
 
 // ========== Setup ==========

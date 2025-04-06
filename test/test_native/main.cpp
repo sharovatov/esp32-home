@@ -18,6 +18,7 @@
 #include "mqtt/mqtt_dispatcher.h"
 
 #include "boot/boot.h"
+#include "fakes/buzzer_fake.h"
 
 /*
   I want the sensors registry to be populated with all the physically present sensors,
@@ -95,7 +96,8 @@ void test_request_topic_dispatches_to_sensor()
 
     FakeMqttClient mqtt;
 
-    dispatchMqttRequest("esp32/request/temp", registry, mqtt);
+    FakeBuzzer buzzer;
+    dispatchMqttRequest("esp32/request/temp", registry, mqtt, buzzer);
 
     TEST_ASSERT_EQUAL_STRING("esp32/response/temp", mqtt.lastTopic.c_str());
     TEST_ASSERT_EQUAL_STRING("22.5", mqtt.lastMessage.c_str());
@@ -108,7 +110,9 @@ void test_invalid_mqtt_topic_publishes_error()
     FakeMqttClient mqtt;
 
     std::string invalidTopic = "bad/request/temp";
-    dispatchMqttRequest(invalidTopic, registry, mqtt);
+
+    FakeBuzzer buzzer;
+    dispatchMqttRequest(invalidTopic, registry, mqtt, buzzer);
 
     TEST_ASSERT_EQUAL_STRING("esp32/response/error", mqtt.lastTopic.c_str());
     TEST_ASSERT_EQUAL_STRING(("invalid_topic:" + invalidTopic).c_str(), mqtt.lastMessage.c_str());
@@ -121,7 +125,9 @@ void test_empty_sensor_name_publishes_error()
     FakeMqttClient mqtt;
 
     std::string emptySensorTopic = "esp32/request/";
-    dispatchMqttRequest(emptySensorTopic, registry, mqtt);
+
+    FakeBuzzer buzzer;
+    dispatchMqttRequest(emptySensorTopic, registry, mqtt, buzzer);
 
     TEST_ASSERT_EQUAL_STRING("esp32/response/error", mqtt.lastTopic.c_str());
     TEST_ASSERT_EQUAL_STRING("sensor_unknown:", mqtt.lastMessage.c_str());
@@ -232,6 +238,18 @@ void test_boot_registers_and_publishes_real_sensors()
     TEST_ASSERT_EQUAL_STRING("[\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
 }
 
+// =============== buzzer ===============
+
+void test_buzzer_buzzes_on_request()
+{
+    SensorRegistry registry;
+    FakeMqttClient mqtt;
+    FakeBuzzer buzzer;
+    dispatchMqttRequest("esp32/request/temp", registry, mqtt, buzzer);
+
+    TEST_ASSERT_TRUE_MESSAGE(buzzer.buzzed, "Buzzer should buzz on any request");
+}
+
 int main()
 {
     UNITY_BEGIN();
@@ -250,6 +268,7 @@ int main()
     RUN_TEST(test_dht_sensor_returns_stubbed_data);
     RUN_TEST(test_boot_registers_and_publishes_dht_sensor);
     RUN_TEST(test_boot_registers_and_publishes_real_sensors);
+    RUN_TEST(test_buzzer_buzzes_on_request);
 
     return UNITY_END();
 }

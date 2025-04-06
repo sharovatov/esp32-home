@@ -111,11 +111,14 @@ void test_humidity_sensor_reads_value()
     TEST_ASSERT_TRUE_MESSAGE(strcmp("error", reading.c_str()) != 0, "HumiditySensor returned 'error'");
 }
 
+// I'd love to do an integration test for the buzzer but the code can't listen lol
+
 void setup()
 {
     delay(2000); // Wait for serial monitor to connect
     UNITY_BEGIN();
     RUN_TEST(test_temperature_sensor_reads_value);
+    delay(100); // needed for dht11 since it's slow
     RUN_TEST(test_humidity_sensor_reads_value);
     RUN_TEST(test_wifi_connects_successfully);
     RUN_TEST(test_mqtt_publish_and_receive);
