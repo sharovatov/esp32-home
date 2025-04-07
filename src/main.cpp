@@ -1,10 +1,11 @@
+// ========== ESP libs ==========
 #include <Arduino.h>
 #include <WiFi.h>
 
+// ========== My libs ==========
 #include "credentials.h"
 #include "wifi/wifi_manager.h"
 #include "wifi_manager_esp.h"
-
 #include "mqtt/mqtt_dispatcher.h"
 #include "mqtt/mqtt_client.h"
 #include "mqtt_client_esp.h"
@@ -12,33 +13,20 @@
 #include "sensor/sensor_request_handler.h"
 #include "sensor/sensor_publisher.h"
 #include "boot/boot.h"
-
 #include "sensor/isensor.h"
-#include "buzzer_esp.cpp"
+
+// ========== Sensors ==========
+#include "buzzer_esp.h"
+#include "camera_sensor_esp.h"
 
 #define DHTPIN 33
 #include "temperature_sensor_esp.h"
 #include "humidity_sensor_esp.h"
 
-#include "camera_sensor_esp.h"
-
 // ========== Globals ==========
 WiFiClient wifiClient;
 RealMqttClient *mqtt = nullptr;
 SensorRegistry registry;
-
-// dummy sensor will only be used for some time here until it's not needed
-class DummySensor : public ISensor
-{
-public:
-  DummySensor(const std::string &n, const std::string &v) : sensorName(n), value(v) {}
-  std::string name() const override { return sensorName; }
-  std::string read() override { return value; }
-
-private:
-  std::string sensorName;
-  std::string value;
-};
 
 // ========== sensors init  ==========
 std::vector<std::shared_ptr<ISensor>> createSensors()
