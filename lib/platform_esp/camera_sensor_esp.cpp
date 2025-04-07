@@ -14,6 +14,10 @@ void RealCameraSensor::init()
     camera_config_t config;
     config.ledc_channel = LEDC_CHANNEL_0;
     config.ledc_timer = LEDC_TIMER_0;
+
+    // this cam uses 14 GPIO pins
+
+    // pixel values sent through pin_d0 to pin_d7
     config.pin_d0 = 4;
     config.pin_d1 = 5;
     config.pin_d2 = 18;
@@ -22,12 +26,22 @@ void RealCameraSensor::init()
     config.pin_d5 = 39;
     config.pin_d6 = 34;
     config.pin_d7 = 35;
+
+    // input clock from the ESP32 to the camera
     config.pin_xclk = 21;
+
+    // pixel clock from the camera to the ESP32
     config.pin_pclk = 22;
+
     config.pin_vsync = 25;
     config.pin_href = 23;
+
+    // serial data line
     config.pin_sccb_sda = 26;
+
+    // serial clock line
     config.pin_sccb_scl = 27;
+
     config.pin_pwdn = -1;
     config.pin_reset = -1;
     config.xclk_freq_hz = 20000000;

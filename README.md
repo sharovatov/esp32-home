@@ -129,3 +129,39 @@ python3 -m unittest test/test_generate_sensors_js.py
 ```
 
 This test validates the structure and output of the generated file.
+
+### 🧭 ESP32 GPIO Usage Overview
+
+| GPIO | Status       | Used By       | Purpose / Notes                                  |
+|------|--------------|---------------|--------------------------------------------------|
+| 0    | ⚠️ Avoid     | Boot pin      | Must be pulled LOW to enter flash mode           |
+| 1    | ⚠️ UART TX   | Serial        | TX0 — used for programming/debug                 |
+| 2    | ⚠️ Avoid     | Boot pin      | Must be LOW on boot; often used for onboard LED  |
+| 3    | ⚠️ UART RX   | Serial        | RX0 — used for programming/debug                 |
+| 4    | ❌ Occupied  | Camera        | D0                                               |
+| 5    | ❌ Occupied  | Camera        | D1                                               |
+| 12   | ⚠️ Caution   | -             | Must be LOW on boot — strapping pin              |
+| 13   | ✅ Free      | -             | Safe, often used for SPI                         |
+| 14   | ❌ Occupied  | Buzzer        | Passive buzzer signal                            |
+| 15   | ✅ Free      | -             | Often used for SPI CS                            |
+| 16   | ✅ Free      | -             | Can be used; UART2 RX                            |
+| 17   | ✅ Free      | -             | Can be used; UART2 TX                            |
+| 18   | ❌ Occupied  | Camera        | D2                                               |
+| 19   | ❌ Occupied  | Camera        | D3                                               |
+| 21   | ❌ Occupied  | Camera        | XCLK                                             |
+| 22   | ❌ Occupied  | Camera        | PCLK                                             |
+| 23   | ❌ Occupied  | Camera        | HREF                                             |
+| 25   | ❌ Occupied  | Camera        | VSYNC                                            |
+| 26   | ❌ Occupied  | Camera        | SCCB SDA                                         |
+| 27   | ❌ Occupied  | Camera        | SCCB SCL                                         |
+| 32   | ✅ Free      | -             | Safe; ADC1 input                                 |
+| 33   | ❌ Occupied  | DHT11         | Temp & humidity sensor                           |
+| 34   | ❌ Occupied  | Camera        | D6 (input only)                                  |
+| 35   | ❌ Occupied  | Camera        | D7 (input only)                                  |
+| 36   | ❌ Occupied  | Camera        | D4 (input only)                                  |
+| 39   | ❌ Occupied  | Camera        | D5 (input only)                                  |
+
+### ✅ Legend:
+- **✅ Free** – safe to use for sensors/peripherals  
+- **❌ Occupied** – already used here
+- **⚠️ Caution / Avoid** – avoid unless really sure
