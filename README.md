@@ -90,46 +90,6 @@ The core logic of the system is developed using **Test-Driven Development (TDD)*
 
 Sensor handling, message formatting, encoding, and MQTT dispatching are all tested independently of hardware.
 
-### Usage
-
-Instructions on how to build, upload and monitor will go here.
-
-### 🧪 JavaScript Client Generation
-
-This project auto-generates a `sensors.js` file that lists all available sensors for use in your web client.
-
-#### 🔧 How it works
-
-- A PlatformIO [extra script](tools/generate_sensors_js.py) runs during each build and generates a file named `sensors.js`.
-- This file exports a list of available sensor names, e.g.:
-
-```js
-// Auto-generated file
-
-export const availableSensors = [
-  "camera",
-  "temp",
-  "humidity",
-];
-```
-
-#### 📄 Output file
-
-- The generated file will be saved at the root of the project as `sensors.js`
-- You can include this in your static site to drive a client interface.
-
-#### 🧪 Testing the generator
-
-The JS generation logic is tested using standard Python unit tests.
-
-To run the tests:
-
-```bash
-python3 -m unittest test/test_generate_sensors_js.py
-```
-
-This test validates the structure and output of the generated file.
-
 ### 🧭 ESP32 GPIO Usage Overview
 
 | GPIO | Status       | Used By       | Purpose / Notes                                  |
