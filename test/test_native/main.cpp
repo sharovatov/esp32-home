@@ -253,7 +253,7 @@ void test_buzzer_buzzes_on_request()
 }
 
 // =============== camera ===============
-
+// camera should initialise and return base64-encoded image upon .read() call
 void test_camera_driver_returns_base64_image()
 {
     FakeCameraSensor camera;
@@ -274,6 +274,7 @@ void test_camera_driver_returns_base64_image()
     TEST_ASSERT_TRUE_MESSAGE(image.length() > 10000, "Camera output too small to be a valid JPEG in base64");
 }
 
+// and also .read() shouldn't be possible without .init()
 void test_camera_read_fails_without_initialisation()
 {
     FakeCameraSensor camera;

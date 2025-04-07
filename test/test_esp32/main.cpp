@@ -122,11 +122,12 @@ void test_camera_returns_base64_string()
     std::string image = camera.read();
 
     TEST_ASSERT_FALSE_MESSAGE(image.empty(), "Camera returned empty string");
-    TEST_ASSERT_TRUE_MESSAGE(image.find("==") != std::string::npos, "Camera output does not look like base64");
+    TEST_ASSERT_TRUE_MESSAGE(image.length() > 10000, "Camera output too small to be a valid JPEG in base64");
 }
 
 void setup()
 {
+    Serial.begin(115200);
     delay(2000); // Wait for serial monitor to connect
     UNITY_BEGIN();
     RUN_TEST(test_temperature_sensor_reads_value);

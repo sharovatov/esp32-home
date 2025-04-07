@@ -2,6 +2,7 @@
 #include "esp_camera.h"
 #include "mbedtls/base64.h"
 #include <esp_log.h>
+#include <HardwareSerial.h>
 
 RealCameraSensor::RealCameraSensor()
 {
@@ -50,19 +51,31 @@ void RealCameraSensor::init()
 std::string RealCameraSensor::read()
 {
     if (!isInitialised)
+    {
+        Serial.println("[CameraSensor] Not initialised");
         return "error:not_initialized";
+    }
+
+    Serial.println("[CameraSensor] Attempting to capture frame...");
 
     camera_fb_t *fb = esp_camera_fb_get();
     if (!fb)
+    {
+        Serial.println("[CameraSensor] Failed to get frame buffer (fb is null)");
         return "error:no_frame";
+    }
+
+    Serial.printf("[CameraSensor] Frame captured: %u bytes\n", fb->len);
 
     size_t output_len = 4 * ((fb->len + 2) / 3) + 1;
     uint8_t *output_buffer = (uint8_t *)malloc(output_len);
     if (!output_buffer)
     {
+        Serial.println("[CameraSensor] Failed to allocate memory for base64 encoding");
         esp_camera_fb_return(fb);
         return "error:malloc_failed";
     }
+    Serial.printf("[CameraSensor] Allocated %u bytes for base64\n", output_len);
 
     size_t actual_len;
     int ret = mbedtls_base64_encode(output_buffer, output_len, &actual_len, fb->buf, fb->len);
@@ -70,12 +83,19 @@ std::string RealCameraSensor::read()
 
     if (ret != 0)
     {
+        Serial.printf("[CameraSensor] Base64 encoding failed with code %d\n", ret);
+
         free(output_buffer);
         return "error:base64_failed";
     }
 
+    Serial.printf("[CameraSensor] Base64 encoded length: %u\n", actual_len);
+
     std::string result((char *)output_buffer, actual_len);
     free(output_buffer);
+
+    Serial.println("[CameraSensor] Image read successfully");
+
     return result;
 }
 
