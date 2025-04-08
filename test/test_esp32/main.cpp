@@ -101,13 +101,13 @@ void test_mqtt_publish_and_receive()
 // test dht11 for real readings
 void test_temperature_sensor_reads_value()
 {
-    TemperatureSensor sensor(DHTPIN, DHT11, "temp");
+    TemperatureSensor sensor(DHTPIN, DHT11);
     auto reading = sensor.read();
     TEST_ASSERT_TRUE_MESSAGE(strcmp("error", reading.c_str()) != 0, "TemperatureSensor returned 'error'");
 }
 void test_humidity_sensor_reads_value()
 {
-    HumiditySensor sensor(DHTPIN, DHT11, "humidity");
+    HumiditySensor sensor(DHTPIN, DHT11);
     auto reading = sensor.read();
     Serial.print("Humidity reading: ");
     Serial.println(reading.c_str());
