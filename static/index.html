@@ -1,67 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>ESP32 MQTT Client</title>
 </head>
 <body>
-    <h1>ESP32 MQTT sample client</h1>
+  <h1>ESP32 MQTT Web Client</h1>
 
-    <!-- <button id="req-temp">Request Temperature</button>
-    <button id="req-humidity">Request Humidity</button>
-    <button id="req-camera">Request Image</button>-->
+  <div id="buttons"></div>
+  <div id="readings"></div>
+  <img id="esp32-image" width="320" height="240" style="display:none;" />
 
-    <h2 id="temp">Temperature: --</h2>
-    <h2 id="humidity">Humidity: --</h2>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script>
+    const broker = "wss://agilenewsflash.com:9001";
+    const username = "esp32user";
+    const password = "Hikwaq-guhho8-gugben";
+    const requestPrefix = "esp32/request/";
+    const responsePrefix = "esp32/response/";
+    const availableSensorsTopic = "esp32/available_sensors";
 
-    <h2>Capture image</h2>
-    <img id="esp32-image" width="320" height="240" alt="No image yet">
+    const client = mqtt.connect(broker, { username, password, reconnectPeriod: 5000 });
 
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-    <script src="sensors.js"></script>
+    client.on("connect", () => {
+      console.log("Connected to MQTT");
+      client.subscribe(availableSensorsTopic);
+      client.subscribe(responsePrefix + "#");
+    });
 
-    <script type="module">
-        const MQTT_BROKER = "wss://agilenewsflash.com:9001";
-        const MQTT_USERNAME = "esp32user";
-        const MQTT_PASSWORD = "Hikwaq-guhho8-gugben";
-        const SENSOR_REQUEST_TOPIC = "esp32/request/";
-        const SENSOR_RESPONSE_TOPIC = "esp32/response/";
-        const AVAILABLE_SENSORS_TOPIC = "esp32/available_sensors";
-        var client = mqtt.connect(MQTT_BROKER, {
-            username: MQTT_USERNAME,
-            password: MQTT_PASSWORD,
-            reconnectPeriod: 5000,
-        });
+    client.on("message", (topic, message) => {
+      const payload = message.toString();
+      if (topic === availableSensorsTopic) {
+        const sensors = JSON.parse(payload);
+        renderSensorButtons(sensors);
+      } else if (topic.startsWith(responsePrefix)) {
+        const sensor = topic.slice(responsePrefix.length);
+        handleSensorResponse(sensor, payload);
+      }
+    });
 
-        function requestSensor(name) {
-            mqttClient.publish(`esp32/request/${name}`, '');
+    function renderSensorButtons(sensors) {
+      const buttonsDiv = document.getElementById("buttons");
+      const readingsDiv = document.getElementById("readings");
+      buttonsDiv.innerHTML = "";
+      readingsDiv.innerHTML = "";
+
+      sensors.forEach(sensor => {
+        const btn = document.createElement("button");
+        btn.textContent = `Request ${sensor}`;
+        btn.onclick = () => client.publish(requestPrefix + sensor, "");
+        buttonsDiv.appendChild(btn);
+
+        const display = document.createElement("h2");
+        display.id = `sensor-${sensor}`;
+        display.textContent = `${sensor}: --`;
+        readingsDiv.appendChild(display);
+      });
+    }
+
+    function handleSensorResponse(sensor, value) {
+      if (sensor === "camera") {
+        const img = document.getElementById("esp32-image");
+        img.style.display = "block";
+        img.src = `data:image/jpeg;base64,${value}`;
+      } else {
+        const el = document.getElementById(`sensor-${sensor}`);
+        if (el) {
+          el.textContent = `${sensor}: ${value}`;
         }
-
-        window.onload = function () {
-            //let _a, _b, _c;
-            console.log("init the MQTT client...");
-            client.on("connect", function () {
-                console.log("MQTT connected");
-                client.subscribe(AVAILABLE_SENSORS_TOPIC);
-                client.subscribe(SENSOR_RESPONSE_TOPIC + "#");
-            });
-            client.on("message", function (topic, message) {
-                var payload = message.toString();
-                console.log("received msg on ".concat(topic, ":"), payload);
-                if (topic === AVAILABLE_SENSORS_TOPIC) {
-                    console.log("ESP-32 published sensors:", JSON.parse(payload));
-                }
-                else if (topic.startsWith(SENSOR_RESPONSE_TOPIC)) {
-                    var sensor = topic.replace(SENSOR_RESPONSE_TOPIC, "");
-                    updateSensorData(sensor, payload);
-                }
-            });
-            //(_a = document.getElementById("req-temp")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", function () { return requestSensorData("temp"); });
-            //(_b = document.getElementById("req-humidity")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", function () { return requestSensorData("humidity"); });
-            //(_c = document.getElementById("req-camera")) === null || _c === void 0 ? void 0 : _c.addEventListener("click", function () { return requestSensorData("camera"); });
-        };  
-    </script>
+      }
+    }
+  </script>
 </body>
 </html>
-

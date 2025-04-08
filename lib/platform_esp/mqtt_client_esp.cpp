@@ -16,6 +16,11 @@ void RealMqttClient::publish(const std::string &topic, const std::string &messag
     client.publish(topic.c_str(), message.c_str());
 }
 
+void RealMqttClient::publish(const std::string &topic, const std::string &message, bool retain)
+{
+    client.publish(topic.c_str(), message.c_str(), retain);
+}
+
 void RealMqttClient::subscribe(const std::string &topic)
 {
     client.subscribe(topic.c_str());

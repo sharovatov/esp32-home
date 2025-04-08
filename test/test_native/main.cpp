@@ -75,6 +75,21 @@ void test_unknown_sensor_publishes_error()
     TEST_ASSERT_EQUAL_STRING(expectedErrorMsg.c_str(), mqtt.lastMessage.c_str());
 }
 
+// check retaining
+void test_available_sensors_are_published_with_retain()
+{
+    SensorRegistry registry;
+    registry.add(std::make_shared<DummySensor>("temp", ""));
+    registry.add(std::make_shared<DummySensor>("humidity", ""));
+
+    FakeMqttClient mqtt;
+    publishAvailableSensors(registry, mqtt);
+
+    TEST_ASSERT_EQUAL_STRING("esp32/available_sensors", mqtt.lastTopic.c_str());
+    TEST_ASSERT_EQUAL_STRING("[\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
+    TEST_ASSERT_TRUE_MESSAGE(mqtt.lastRetain, "Available sensors message should be retained");
+}
+
 // sensors should be able to respond to requests correctly with the readings
 void test_sensor_request_is_routed_and_published()
 {
@@ -308,6 +323,7 @@ int main()
     RUN_TEST(test_camera_driver_returns_base64_image);
     RUN_TEST(test_camera_read_fails_without_initialisation);
     RUN_TEST(test_air_quality_sensor_converts_raw_value_to_percentage);
+    RUN_TEST(test_available_sensors_are_published_with_retain);
 
     return UNITY_END();
 }

@@ -7,6 +7,8 @@ class FakeMqttClient : public MqttClient
 public:
     std::string lastTopic;
     std::string lastMessage;
+    bool lastRetain = false;
+
     std::string subscribedTopic;
     std::string receivedClientId;
     std::string receivedUsername;
@@ -25,6 +27,14 @@ public:
     {
         lastTopic = topic;
         lastMessage = message;
+        lastRetain = false;
+    }
+
+    void publish(const std::string &topic, const std::string &message, bool retain) override
+    {
+        lastTopic = topic;
+        lastMessage = message;
+        lastRetain = retain;
     }
 
     void subscribe(const std::string &topic) override

@@ -13,5 +13,5 @@ void publishAvailableSensors(const SensorRegistry &registry, MqttClient &mqtt)
     }
     result += "]";
 
-    mqtt.publish("esp32/available_sensors", result);
+    mqtt.publish("esp32/available_sensors", result, true);
 }
