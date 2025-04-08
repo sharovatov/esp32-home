@@ -22,6 +22,7 @@
 #define DHTPIN 33
 #include "temperature_sensor_esp.h"
 #include "humidity_sensor_esp.h"
+#include <air_quality_sensor.h>
 
 // ========== Globals ==========
 WiFiClient wifiClient;
@@ -37,6 +38,7 @@ std::vector<std::shared_ptr<ISensor>> createSensors()
   return {
       std::make_shared<TemperatureSensor>(DHTPIN, DHT11, "temp"),
       std::make_shared<HumiditySensor>(DHTPIN, DHT11, "humidity"),
+      std::make_shared<MQ135Sensor>(13, 30, 230),
       camera};
 }
 

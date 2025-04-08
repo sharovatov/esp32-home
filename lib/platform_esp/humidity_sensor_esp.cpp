@@ -1,7 +1,7 @@
 #include "humidity_sensor_esp.h"
 
-HumiditySensor::HumiditySensor(uint8_t pin, uint8_t type, const std::string &sensorName)
-    : sensorName(sensorName), dht(pin, type)
+HumiditySensor::HumiditySensor(uint8_t pin, uint8_t type)
+    : sensorName("humidity"), dht(pin, type)
 {
     dht.begin();
 }

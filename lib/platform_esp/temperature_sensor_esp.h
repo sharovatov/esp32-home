@@ -5,7 +5,7 @@
 class TemperatureSensor : public ISensor
 {
 public:
-    TemperatureSensor(uint8_t pin, uint8_t type, const std::string &sensorName);
+    TemperatureSensor(uint8_t pin, uint8_t type);
     std::string name() const override;
     std::string read() override;
 

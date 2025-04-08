@@ -5,7 +5,7 @@
 class HumiditySensor : public ISensor
 {
 public:
-    HumiditySensor(uint8_t pin, uint8_t type, const std::string &sensorName);
+    HumiditySensor(uint8_t pin, uint8_t type);
     std::string name() const override;
     std::string read() override;
 

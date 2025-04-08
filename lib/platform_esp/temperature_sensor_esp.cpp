@@ -1,7 +1,7 @@
 #include "temperature_sensor_esp.h"
 
-TemperatureSensor::TemperatureSensor(uint8_t pin, uint8_t type, const std::string &sensorName)
-    : sensorName(sensorName), dht(pin, type)
+TemperatureSensor::TemperatureSensor(uint8_t pin, uint8_t type)
+    : sensorName("temp"), dht(pin, type)
 {
     dht.begin();
 }
