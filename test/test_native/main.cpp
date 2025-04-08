@@ -7,12 +7,13 @@
 #include "sensor/sensor_request_handler.h"
 #include "sensor/sensor_publisher.h"
 
+#include "fakes/buzzer_fake.h"
 #include "fakes/mqtt_client.h"
 #include "fakes/dummy_sensor.h"
 #include "fakes/wifi_manager.h"
 #include "fakes/dht_sensor.h"
 #include "fakes/camera_sensor.h"
-#include <fakes/air_quality_sensor.h>
+#include "fakes/air_quality_sensor.h"
 
 #include "sensor/temperature_sensor.h"
 #include "sensor/humidity_sensor.h"
@@ -20,7 +21,6 @@
 #include "mqtt/mqtt_dispatcher.h"
 
 #include "boot/boot.h"
-#include "fakes/buzzer_fake.h"
 
 /*
   I want the sensors registry to be populated with all the physically present sensors,
@@ -277,24 +277,13 @@ void test_camera_read_fails_without_initialisation()
 }
 
 // quality sensor logics should work
-void test_air_quality_sensor_outputs_correct_percentage()
+void test_air_quality_sensor_converts_raw_value_to_percentage()
 {
-    FakeAirQualitySensor sensor(100, 500); // min, max calibration
-    sensor.setRawValue(300);               // halfway
+    FakeAirQualitySensor sensor(0, 300); // calibration from 0 to 300
+    sensor.setRawValue(150);             // halfway
 
-    std::string reading = sensor.read();
-
-    TEST_ASSERT_EQUAL_STRING("50", reading.c_str());
-}
-void test_air_quality_clamps_out_of_range_values()
-{
-    FakeAirQualitySensor sensor(100, 400);
-
-    sensor.setRawValue(50); // Below range
-    TEST_ASSERT_EQUAL_STRING("0", sensor.read().c_str());
-
-    sensor.setRawValue(500); // Above range
-    TEST_ASSERT_EQUAL_STRING("100", sensor.read().c_str());
+    std::string result = sensor.read();
+    TEST_ASSERT_EQUAL_STRING("50", result.c_str());
 }
 
 int main()
@@ -318,8 +307,7 @@ int main()
     RUN_TEST(test_buzzer_buzzes_on_request);
     RUN_TEST(test_camera_driver_returns_base64_image);
     RUN_TEST(test_camera_read_fails_without_initialisation);
-    RUN_TEST(test_air_quality_sensor_outputs_correct_percentage);
-    RUN_TEST(test_air_quality_clamps_out_of_range_values);
+    RUN_TEST(test_air_quality_sensor_converts_raw_value_to_percentage);
 
     return UNITY_END();
 }

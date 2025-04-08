@@ -1,18 +1,15 @@
 #pragma once
-#include "sensor/isensor.h"
-#include <string>
-#include <cmath>
-#include <algorithm>
+#include "sensor/air_quality_sensor_base.h"
 
-class FakeAirQualitySensor : public ISensor
+class FakeAirQualitySensor : public AirQualitySensorBase
 {
 public:
-    FakeAirQualitySensor(int rawMin, int rawMax)
-        : rawMin(rawMin), rawMax(rawMax), rawValue(rawMin) {}
+    FakeAirQualitySensor(int minRaw, int maxRaw)
+        : AirQualitySensorBase(minRaw, maxRaw), currentRaw(minRaw) {}
 
     void setRawValue(int value)
     {
-        rawValue = value;
+        currentRaw = value;
     }
 
     std::string name() const override
@@ -22,13 +19,9 @@ public:
 
     std::string read() override
     {
-        float ratio = float(rawValue - rawMin) / float(rawMax - rawMin);
-        int clamped = std::min(100, std::max(0, int(ratio * 100.0f + 0.5f)));
-        return std::to_string(clamped);
+        return std::to_string(calculatePercentage(currentRaw));
     }
 
 private:
-    int rawMin;
-    int rawMax;
-    int rawValue;
+    int currentRaw;
 };

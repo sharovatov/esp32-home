@@ -14,6 +14,9 @@
 #include "humidity_sensor_esp.h"
 #include <camera_sensor_esp.h>
 
+#include "air_quality_sensor.h"
+#define MQ135PIN 13
+
 WiFiClient wifiClient;
 bool mqttMessageReceived = false;
 String mqttReceivedTopic;
@@ -125,17 +128,31 @@ void test_camera_returns_base64_string()
     TEST_ASSERT_TRUE_MESSAGE(image.length() > 10000, "Camera output too small to be a valid JPEG in base64");
 }
 
+void test_mq135_sensor_reads_percentage()
+{
+    MQ135Sensor sensor(MQ135PIN, 30, 230);
+
+    std::string reading = sensor.read();
+    Serial.print("MQ135 reading: ");
+    Serial.println(reading.c_str());
+
+    int value = std::stoi(reading);
+    TEST_ASSERT_TRUE_MESSAGE(value >= 0 && value <= 100, "MQ135 percentage out of range");
+}
+
 void setup()
 {
     Serial.begin(115200);
     delay(2000); // Wait for serial monitor to connect
     UNITY_BEGIN();
+
     RUN_TEST(test_temperature_sensor_reads_value);
     delay(100); // needed for dht11 since it's slow
     RUN_TEST(test_humidity_sensor_reads_value);
     RUN_TEST(test_wifi_connects_successfully);
     RUN_TEST(test_mqtt_publish_and_receive);
     RUN_TEST(test_camera_returns_base64_string);
+    RUN_TEST(test_mq135_sensor_reads_percentage);
 
     UNITY_END();
 }
