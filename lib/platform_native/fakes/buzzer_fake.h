@@ -1,5 +1,5 @@
 #pragma once
-#include "ibuzzer.h"
+#include "sensor/buzzer_sensor.h"
 
 class FakeBuzzer : public IBuzzer
 {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "ibuzzer.h"
+#include "sensor/buzzer_sensor.h"
 #include "sensor/sensor_registry.h"
 #include "sensor/sensor_request_handler.h" // for MqttClient
 
