@@ -8,7 +8,6 @@
 #include "mqtt/mqtt_client.h"
 #include "mqtt_client_esp.h"
 
-#include "dht_sensor_esp.h"
 #define DHTPIN 33
 #include "temperature_sensor_esp.h"
 #include "humidity_sensor_esp.h"
