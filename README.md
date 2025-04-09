@@ -101,7 +101,7 @@ Sensor handling, message formatting, encoding, and MQTT dispatching are all test
 | 4    | ❌ Occupied  | Camera        | D0                                               |
 | 5    | ❌ Occupied  | Camera        | D1                                               |
 | 12   | ⚠️ Caution   | -             | Must be LOW on boot — strapping pin              |
-| 13   | ✅ Free      | -             | Safe, often used for SPI                         |
+| 13   | ❌ Occupie   | ADC2          | Wifi uses ADC2, so no reading when Wifi=on       |
 | 14   | ❌ Occupied  | Buzzer        | Passive buzzer signal                            |
 | 15   | ✅ Free      | -             | Often used for SPI CS                            |
 | 16   | ✅ Free      | -             | Can be used; UART2 RX                            |
@@ -114,7 +114,7 @@ Sensor handling, message formatting, encoding, and MQTT dispatching are all test
 | 25   | ❌ Occupied  | Camera        | VSYNC                                            |
 | 26   | ❌ Occupied  | Camera        | SCCB SDA                                         |
 | 27   | ❌ Occupied  | Camera        | SCCB SCL                                         |
-| 32   | ✅ Free      | -             | Safe; ADC1 input                                 |
+| 32   | ❌ Occupied  | MQ-135        | MQ-135 Air Quality sensor                        |
 | 33   | ❌ Occupied  | DHT11         | Temp & humidity sensor                           |
 | 34   | ❌ Occupied  | Camera        | D6 (input only)                                  |
 | 35   | ❌ Occupied  | Camera        | D7 (input only)                                  |

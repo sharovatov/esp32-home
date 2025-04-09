@@ -38,7 +38,7 @@ std::vector<std::shared_ptr<ISensor>> createSensors()
   return {
       std::make_shared<TemperatureSensor>(DHTPIN, DHT11),
       std::make_shared<HumiditySensor>(DHTPIN, DHT11),
-      std::make_shared<MQ135Sensor>(13, 30, 230),
+      std::make_shared<MQ135Sensor>(32, 30, 230),
       camera};
 }
 

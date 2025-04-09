@@ -14,7 +14,7 @@
 #include <camera_sensor_esp.h>
 
 #include "air_quality_sensor.h"
-#define MQ135PIN 13
+#define MQ135PIN 32
 
 WiFiClient wifiClient;
 bool mqttMessageReceived = false;
