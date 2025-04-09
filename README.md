@@ -101,7 +101,7 @@ Sensor handling, message formatting, encoding, and MQTT dispatching are all test
 | 4    | ❌ Occupied  | Camera        | D0                                               |
 | 5    | ❌ Occupied  | Camera        | D1                                               |
 | 12   | ⚠️ Caution   | -             | Must be LOW on boot — strapping pin              |
-| 13   | ❌ Occupie   | ADC2          | Wifi uses ADC2, so no reading when Wifi=on       |
+| 13   | ❌ Occupied  | ADC2          | Wifi uses ADC2, so no reading when Wifi=on       |
 | 14   | ❌ Occupied  | Buzzer        | Passive buzzer signal                            |
 | 15   | ✅ Free      | -             | Often used for SPI CS                            |
 | 16   | ✅ Free      | -             | Can be used; UART2 RX                            |
