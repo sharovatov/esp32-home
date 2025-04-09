@@ -49,7 +49,7 @@ void RealCameraSensor::init()
     config.pixel_format = PIXFORMAT_JPEG;
     config.grab_mode = CAMERA_GRAB_LATEST;
     config.fb_location = CAMERA_FB_IN_PSRAM;
-    config.jpeg_quality = 12;
+    config.jpeg_quality = 13;
     config.fb_count = 2;
 
     esp_err_t err = esp_camera_init(&config);
