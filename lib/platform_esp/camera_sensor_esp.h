@@ -10,6 +10,7 @@ public:
     void init();
     std::string name() const override;
     std::string read() override;
+    std::string type() const override;
 
 private:
     const std::string sensorName = "camera";

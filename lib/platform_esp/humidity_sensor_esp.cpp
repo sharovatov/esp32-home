@@ -22,3 +22,8 @@ std::string HumiditySensor::read()
     snprintf(buffer, sizeof(buffer), "%.1f", h);
     return std::string(buffer);
 }
+
+std::string HumiditySensor::type() const
+{
+    return "text/plain";
+}

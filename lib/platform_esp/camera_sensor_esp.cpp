@@ -117,3 +117,8 @@ std::string RealCameraSensor::name() const
 {
     return sensorName;
 }
+
+std::string RealCameraSensor::type() const
+{
+    return "image/jpeg";
+}

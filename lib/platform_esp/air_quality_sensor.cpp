@@ -17,3 +17,8 @@ std::string MQ135Sensor::read()
     int raw = analogRead(pin);
     return std::to_string(calculatePercentage(raw));
 }
+
+std::string MQ135Sensor::type() const
+{
+    return "text/plain";
+}
