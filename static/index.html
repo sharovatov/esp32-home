@@ -13,65 +13,79 @@
 
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script>
-    const broker = "wss://agilenewsflash.com:9001";
-    const username = "esp32user";
-    const password = "Hikwaq-guhho8-gugben";
-    const requestPrefix = "esp32/request/";
-    const responsePrefix = "esp32/response/";
-    const availableSensorsTopic = "esp32/available_sensors";
+const broker = "wss://agilenewsflash.com:9001";
+const username = "esp32user";
+const password = "Hikwaq-guhho8-gugben";
+const requestPrefix = "esp32/request/";
+const responsePrefix = "esp32/response/";
+const availableSensorsTopic = "esp32/available_sensors";
 
+const sensorMetadata = {}; // key: sensor name, value: type
 
-    const client = mqtt.connect(broker, { username, password, reconnectPeriod: 5000 });
+const client = mqtt.connect(broker, { username, password, reconnectPeriod: 5000 });
 
-    client.on("connect", () => {
-      console.log("Connected to MQTT");
-      client.subscribe(availableSensorsTopic);
-      client.subscribe(responsePrefix + "#");
-    });
+client.on("connect", () => {
+  console.log("Connected to MQTT");
+  client.subscribe(availableSensorsTopic);
+  client.subscribe(responsePrefix + "#");
+});
 
-    client.on("message", (topic, message) => {
-      const payload = message.toString();
-      if (topic === availableSensorsTopic) {
-        const sensors = JSON.parse(payload);
-        renderSensorButtons(sensors);
-      } else if (topic.startsWith(responsePrefix)) {
-        const sensor = topic.slice(responsePrefix.length);
-        handleSensorResponse(sensor, payload);
-      }
-    });
+client.on("message", (topic, message) => {
+  const payload = message.toString();
+  if (topic === availableSensorsTopic) {
+    const sensors = JSON.parse(payload);
+    renderSensorButtons(sensors);
+  } else if (topic.startsWith(responsePrefix)) {
+    const sensor = topic.slice(responsePrefix.length);
+    handleSensorResponse(sensor, payload);
+  }
+});
 
-    function renderSensorButtons(sensors) {
-      const buttonsDiv = document.getElementById("buttons");
-      const readingsDiv = document.getElementById("readings");
-      buttonsDiv.innerHTML = "";
-      readingsDiv.innerHTML = "";
+function renderSensorButtons(sensors) {
+  const buttonsDiv = document.getElementById("buttons");
+  const readingsDiv = document.getElementById("readings");
+  buttonsDiv.innerHTML = "";
+  readingsDiv.innerHTML = "";
 
-      sensors.forEach(sensor => {
-        const btn = document.createElement("button");
-        btn.textContent = `Request ${sensor}`;
-        btn.onclick = () => client.publish(requestPrefix + sensor, "");
-        buttonsDiv.appendChild(btn);
+  sensors.forEach(({ name, type }) => {
+    sensorMetadata[name] = type;
 
-        const display = document.createElement("h2");
-        display.id = `sensor-${sensor}`;
-        display.textContent = `${sensor}: --`;
-        readingsDiv.appendChild(display);
-      });
+    const btn = document.createElement("button");
+    btn.textContent = `Request ${name}`;
+    btn.onclick = () => client.publish(requestPrefix + name, "");
+    buttonsDiv.appendChild(btn);
+
+    const display = type === "image/jpeg"
+      ? document.createElement("img")
+      : document.createElement("h2");
+
+    display.id = `sensor-${name}`;
+    if (type === "image/jpeg") {
+      display.width = 320;
+      display.height = 240;
+      display.alt = `Image from ${name}`;
+      display.style.display = "none";
+    } else {
+      display.textContent = `${name}: --`;
     }
 
+    readingsDiv.appendChild(display);
+  });
+}
 
-    function handleSensorResponse(sensor, value) {
-      if (sensor === "camera") {
-        const img = document.getElementById("esp32-image");
-        img.style.display = "block";
-        img.src = `data:image/jpeg;base64,${value}`;
-      } else {
-        const el = document.getElementById(`sensor-${sensor}`);
-        if (el) {
-          el.textContent = `${sensor}: ${value}`;
-        }
-      }
-    } 
+function handleSensorResponse(sensor, value) {
+  const type = sensorMetadata[sensor] || "text/plain";
+
+  const el = document.getElementById(`sensor-${sensor}`);
+  if (!el) return;
+
+  if (type === "image/jpeg") {
+    el.style.display = "block";
+    el.src = `data:image/jpeg;base64,${value}`;
+  } else {
+    el.textContent = `${sensor}: ${value}`;
+  }
+}
 </script>
 </body>
 </html>
