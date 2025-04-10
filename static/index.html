@@ -20,6 +20,7 @@
     const responsePrefix = "esp32/response/";
     const availableSensorsTopic = "esp32/available_sensors";
 
+
     const client = mqtt.connect(broker, { username, password, reconnectPeriod: 5000 });
 
     client.on("connect", () => {
@@ -58,6 +59,7 @@
       });
     }
 
+
     function handleSensorResponse(sensor, value) {
       if (sensor === "camera") {
         const img = document.getElementById("esp32-image");
@@ -69,7 +71,7 @@
           el.textContent = `${sensor}: ${value}`;
         }
       }
-    }
-  </script>
+    } 
+</script>
 </body>
 </html>
