@@ -15,9 +15,9 @@ The ESP32 connects to the home Wi-Fi and communicates via my own MQTT broker, pr
 
 ### Discovery
 
-- `esp32/available_sensors`  
-  The ESP32 publishes a JSON list of currently available sensors.  
-  Example payload:
+ESP32 publishes a JSON list of currently available sensors to `esp32/available_sensors` topic.
+  
+Example payload:
   ```json
   [
     { "name": "temp", "type": "text/plain" },
@@ -31,46 +31,44 @@ Clients subscribe to this topic on connect and use the metadata to dynamically r
 
 ### Requesting Sensor Data
 
-- `esp32/request/<sensorName>`  
-  The web client sends requests here.  
-  The `<sensorName>` must match one of the available sensors.
+The web client sends requests to `esp32/request/<sensorName>` topic.
+  
+The `<sensorName>` must match one of the available sensors.
 
-  #### Example:
-  ```
-  esp32/request/camera      → triggers a new photo capture  
-  esp32/request/humidity    → triggers humidity reading  
-  esp32/request/air_quality → triggers air quality percentage
-  esp32/request/temp        → triggers temperature reading
-  ```
+#### Example:
+```
+esp32/request/camera      → triggers a new photo capture  
+esp32/request/humidity    → triggers humidity reading  
+esp32/request/air_quality → triggers air quality percentage
+esp32/request/temp        → triggers temperature reading
+```
 
-The ESP32 will buzz once to confirm reception of any valid or invalid request.
+ESP32 will buzz once to confirm reception of any valid or invalid request.
 
 ### Receiving Sensor Data
 
-- `esp32/response/<sensorName>`  
-  ESP32 publishes sensor results to this topic.
+ESP32 publishes sensor results to `esp32/response/<sensorName>` topic.
 
-  - Topic pattern: esp32/response/<sensorName>
-  - Payload: Value returned by the sensor
+- Topic pattern: esp32/response/<sensorName>
+- Payload: Value returned by the sensor
 
-  #### Example payloads:
-  ```
-  esp32/response/temp: "23.5"
-  esp32/response/humidity: "69.6"
-  esp32/response/air_quality: "47"
-  esp32/response/camera: (Base64-encoded JPEG string)
-  ```
+#### Example payloads:
+```
+esp32/response/temp: "23.5"
+esp32/response/humidity: "69.6"
+esp32/response/air_quality: "47"
+esp32/response/camera: (Base64-encoded JPEG string)
+```
 
 ### Error Handling
 
-- `esp32/response/error`  
-  Any malformed requests, unavailable sensors, or failures are published here.
+Any malformed requests, unavailable sensors, or failures are published to `esp32/response/error` topic.
 
-  #### Example payload:
-  ```
-  sensor_unknown:airflow
-  invalid_topic:bad/request/humidity
-  ```
+#### Example payload:
+```
+sensor_unknown:airflow
+invalid_topic:bad/request/humidity
+```
 
 ## 💻 Web Client
 
