@@ -1,11 +1,8 @@
 # ESP32 Flat Monitor
 
-**Goal:**  
 A lightweight system for remotely checking on the flat — including temperature, humidity, and camera snapshots — using an ESP32, MQTT, and a simple web client.
 
----
-
-## 🌐 Overview
+## Overview
 
 This project uses an ESP32 device equipped with:
 - A camera ([OV5640](https://cdn.sparkfun.com/datasheets/Sensors/LightImaging/OV5640_datasheet.pdf))
@@ -14,11 +11,9 @@ This project uses an ESP32 device equipped with:
 
 The ESP32 connects to the home Wi-Fi and communicates via my own MQTT broker, providing access to real-time sensor data and user-triggered updates.
 
----
+## MQTT Interface
 
-## 🧩 MQTT Interface
-
-### 📰 Discovery
+### Discovery
 
 - `esp32/available_sensors`  
   The ESP32 publishes a JSON list of currently available sensors.  
@@ -33,9 +28,6 @@ The ESP32 connects to the home Wi-Fi and communicates via my own MQTT broker, pr
   ```
 
 Clients subscribe to this topic on connect and use the metadata to dynamically render controls and correctly display responses.
-
----
-
 
 ### Requesting Sensor Data
 
@@ -53,8 +45,6 @@ Clients subscribe to this topic on connect and use the metadata to dynamically r
 
 The ESP32 will buzz once to confirm reception of any valid or invalid request.
 
----
-
 ### Receiving Sensor Data
 
 - `esp32/response/<sensorName>`  
@@ -71,8 +61,6 @@ The ESP32 will buzz once to confirm reception of any valid or invalid request.
   esp32/response/camera: (Base64-encoded JPEG string)
   ```
 
----
-
 ### Error Handling
 
 - `esp32/response/error`  
@@ -83,8 +71,6 @@ The ESP32 will buzz once to confirm reception of any valid or invalid request.
   sensor_unknown:airflow
   invalid_topic:bad/request/humidity
   ```
-
----
 
 ## 💻 Web Client
 
@@ -97,9 +83,7 @@ The frontend is a static HTML + JavaScript page that:
 
 The client is fully decoupled from the ESP32 implementation. It relies exclusively on metadata provided via MQTT.
 
----
-
-## 🧪 Development & Testing
+## Development & Testing
 
 All ESP32 code is developed using Test-Driven Development (TDD) with separation of logic and hardware:
 
@@ -108,7 +92,7 @@ All ESP32 code is developed using Test-Driven Development (TDD) with separation 
 - All sensors are represented by test doubles (fakes/stubs) for isolated testing
 - Sensor registry, MQTT dispatch, message structure, and system boot logic are tested without hardware
 
-### 🧭 ESP32 GPIO Usage Overview
+### ESP32 GPIO Usage Overview
 
 | GPIO | Status       | Used By       | Purpose / Notes                                  |
 |------|--------------|---------------|--------------------------------------------------|
