@@ -22,6 +22,11 @@ public:
         return std::to_string(calculatePercentage(currentRaw));
     }
 
+    std::string type() const override
+    {
+        return "text/plain";
+    }
+
 private:
     int currentRaw;
 };

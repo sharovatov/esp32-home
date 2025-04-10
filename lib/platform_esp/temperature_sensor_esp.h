@@ -8,6 +8,7 @@ public:
     TemperatureSensor(uint8_t pin, uint8_t type);
     std::string name() const override;
     std::string read() override;
+    std::string type() const override;
 
 private:
     std::string sensorName;

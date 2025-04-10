@@ -12,6 +12,11 @@ public:
 
     std::string read() override { return readingValue; }
 
+    std::string type() const override
+    {
+        return "text/plain";
+    }
+
 private:
     std::string sensorName;
     std::string readingValue;

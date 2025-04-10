@@ -23,3 +23,8 @@ std::string TemperatureSensor::read()
     snprintf(buffer, sizeof(buffer), "%.1f", t);
     return std::string(buffer);
 }
+
+std::string TemperatureSensor::type() const
+{
+    return "text/plain";
+}

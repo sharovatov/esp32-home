@@ -14,4 +14,9 @@ public:
     {
         return "45"; // stub for now
     }
+
+    std::string type() const override
+    {
+        return "text/plain";
+    }
 };

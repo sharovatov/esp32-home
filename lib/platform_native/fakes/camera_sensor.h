@@ -27,6 +27,11 @@ public:
         return "/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAA==";
     }
 
+    std::string type() const override
+    {
+        return "image/jpeg";
+    }
+
 private:
     std::string sensorName;
     bool initialised = false;

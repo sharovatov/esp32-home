@@ -31,9 +31,9 @@
 void test_registry_returns_available_sensor_names()
 {
     SensorRegistry registry;
-    registry.add(std::make_shared<DummySensor>("camera", "dummy"));
-    registry.add(std::make_shared<DummySensor>("temp", "dummy"));
-    registry.add(std::make_shared<DummySensor>("humidity", "dummy"));
+    registry.add(std::make_shared<DummySensor>("camera", "dummy", "text/plain"));
+    registry.add(std::make_shared<DummySensor>("temp", "dummy", "text/plain"));
+    registry.add(std::make_shared<DummySensor>("humidity", "dummy", "text/plain"));
 
     auto names = registry.listNames();
     TEST_ASSERT_EQUAL(3, names.size());
@@ -42,19 +42,26 @@ void test_registry_returns_available_sensor_names()
     TEST_ASSERT_EQUAL_STRING("humidity", names[2].c_str());
 }
 
-// all sensors from the registry should be publisheable to mqtt
-void test_publishes_available_sensor_names_to_mqtt()
+// all sensors from the registry should be publisheable to mqtt alongside their types
+void test_publishes_available_sensor_metadata_to_mqtt()
 {
     SensorRegistry registry;
-    registry.add(std::make_shared<DummySensor>("camera", ""));
-    registry.add(std::make_shared<DummySensor>("temp", ""));
-    registry.add(std::make_shared<DummySensor>("humidity", ""));
+    registry.add(std::make_shared<DummySensor>("camera", "", "image/jpeg"));
+    registry.add(std::make_shared<DummySensor>("temp", "", "text/plain"));
+    registry.add(std::make_shared<DummySensor>("humidity", "", "text/plain"));
 
     FakeMqttClient mqtt;
     publishAvailableSensors(registry, mqtt);
 
     TEST_ASSERT_EQUAL_STRING("esp32/available_sensors", mqtt.lastTopic.c_str());
-    TEST_ASSERT_EQUAL_STRING("[\"camera\",\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
+
+    const char *expectedPayload =
+        "["
+        "{\"name\":\"camera\",\"type\":\"image/jpeg\"},"
+        "{\"name\":\"temp\",\"type\":\"text/plain\"},"
+        "{\"name\":\"humidity\",\"type\":\"text/plain\"}"
+        "]";
+    TEST_ASSERT_EQUAL_STRING(expectedPayload, mqtt.lastMessage.c_str());
 }
 
 // if a request comes in for a sensor that does not exist in the registry,
@@ -62,7 +69,7 @@ void test_publishes_available_sensor_names_to_mqtt()
 void test_unknown_sensor_publishes_error()
 {
     SensorRegistry registry;
-    registry.add(std::make_shared<DummySensor>("camera", "imagebytes"));
+    registry.add(std::make_shared<DummySensor>("camera", "imagebytes", "image/jpeg"));
 
     FakeMqttClient mqtt;
 
@@ -76,17 +83,23 @@ void test_unknown_sensor_publishes_error()
 }
 
 // check retaining
-void test_available_sensors_are_published_with_retain()
+void test_available_sensor_metadata_is_retained()
 {
     SensorRegistry registry;
-    registry.add(std::make_shared<DummySensor>("temp", ""));
-    registry.add(std::make_shared<DummySensor>("humidity", ""));
+    registry.add(std::make_shared<DummySensor>("temp", "", "text/plain"));
+    registry.add(std::make_shared<DummySensor>("humidity", "", "text/plain"));
 
     FakeMqttClient mqtt;
     publishAvailableSensors(registry, mqtt);
 
     TEST_ASSERT_EQUAL_STRING("esp32/available_sensors", mqtt.lastTopic.c_str());
-    TEST_ASSERT_EQUAL_STRING("[\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
+
+    const char *expectedPayload =
+        "["
+        "{\"name\":\"temp\",\"type\":\"text/plain\"},"
+        "{\"name\":\"humidity\",\"type\":\"text/plain\"}"
+        "]";
+    TEST_ASSERT_EQUAL_STRING(expectedPayload, mqtt.lastMessage.c_str());
     TEST_ASSERT_TRUE_MESSAGE(mqtt.lastRetain, "Available sensors message should be retained");
 }
 
@@ -94,7 +107,7 @@ void test_available_sensors_are_published_with_retain()
 void test_sensor_request_is_routed_and_published()
 {
     SensorRegistry registry;
-    registry.add(std::make_shared<DummySensor>("camera", "imagebytes"));
+    registry.add(std::make_shared<DummySensor>("camera", "imagebytes", "text/plain"));
 
     FakeMqttClient mqtt;
 
@@ -109,7 +122,7 @@ void test_sensor_request_is_routed_and_published()
 void test_request_topic_dispatches_to_sensor()
 {
     SensorRegistry registry;
-    registry.add(std::make_shared<DummySensor>("temp", "22.5"));
+    registry.add(std::make_shared<DummySensor>("temp", "22.5", "text/plain"));
 
     FakeMqttClient mqtt;
 
@@ -170,15 +183,14 @@ void test_boot_system_registers_and_publishes_sensors()
     FakeMqttClient mqtt;
 
     std::vector<std::shared_ptr<ISensor>> sensors = {
-        std::make_shared<DummySensor>("camera", "dummy"),
-        std::make_shared<DummySensor>("temp", "dummy"),
-        std::make_shared<DummySensor>("humidity", "dummy"),
+        std::make_shared<DummySensor>("camera", "dummy", "image/jpeg"),
+        std::make_shared<DummySensor>("temp", "dummy", "text/plain"),
     };
 
     bootSystem(sensors, registry, mqtt);
 
     TEST_ASSERT_EQUAL_STRING("esp32/available_sensors", mqtt.lastTopic.c_str());
-    TEST_ASSERT_EQUAL_STRING("[\"camera\",\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
+    TEST_ASSERT_EQUAL_STRING("[{\"name\":\"camera\",\"type\":\"image/jpeg\"},{\"name\":\"temp\",\"type\":\"text/plain\"}]", mqtt.lastMessage.c_str());
 }
 
 // =============== wifi ===============
@@ -224,13 +236,13 @@ void test_boot_registers_and_publishes_dht_sensor()
     FakeMqttClient mqtt;
 
     std::vector<std::shared_ptr<ISensor>> sensors = {
-        std::make_shared<DummySensor>("temp", "22.5"),
-        std::make_shared<DummySensor>("humidity", "45")};
+        std::make_shared<DummySensor>("temp", "22.5", "text/plain"),
+        std::make_shared<DummySensor>("humidity", "45", "text/plain")};
 
     bootSystem(sensors, registry, mqtt);
 
     TEST_ASSERT_EQUAL_STRING("esp32/available_sensors", mqtt.lastTopic.c_str());
-    TEST_ASSERT_EQUAL_STRING("[\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
+    TEST_ASSERT_EQUAL_STRING("[{\"name\":\"temp\",\"type\":\"text/plain\"},{\"name\":\"humidity\",\"type\":\"text/plain\"}]", mqtt.lastMessage.c_str());
 
     auto names = registry.listNames();
     TEST_ASSERT_EQUAL(2, names.size());
@@ -252,7 +264,7 @@ void test_boot_registers_and_publishes_real_sensors()
     bootSystem(sensors, registry, mqtt);
 
     TEST_ASSERT_EQUAL_STRING("esp32/available_sensors", mqtt.lastTopic.c_str());
-    TEST_ASSERT_EQUAL_STRING("[\"temp\",\"humidity\"]", mqtt.lastMessage.c_str());
+    TEST_ASSERT_EQUAL_STRING("[{\"name\":\"temp\",\"type\":\"text/plain\"},{\"name\":\"humidity\",\"type\":\"text/plain\"}]", mqtt.lastMessage.c_str());
 }
 
 // =============== buzzer ===============
@@ -306,7 +318,7 @@ int main()
     UNITY_BEGIN();
 
     RUN_TEST(test_registry_returns_available_sensor_names);
-    RUN_TEST(test_publishes_available_sensor_names_to_mqtt);
+    RUN_TEST(test_publishes_available_sensor_metadata_to_mqtt);
     RUN_TEST(test_sensor_request_is_routed_and_published);
     RUN_TEST(test_unknown_sensor_publishes_error);
     RUN_TEST(test_request_topic_dispatches_to_sensor);
@@ -323,7 +335,7 @@ int main()
     RUN_TEST(test_camera_driver_returns_base64_image);
     RUN_TEST(test_camera_read_fails_without_initialisation);
     RUN_TEST(test_air_quality_sensor_converts_raw_value_to_percentage);
-    RUN_TEST(test_available_sensors_are_published_with_retain);
+    RUN_TEST(test_available_sensor_metadata_is_retained);
 
     return UNITY_END();
 }

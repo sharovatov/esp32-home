@@ -2,13 +2,14 @@
 
 void publishAvailableSensors(const SensorRegistry &registry, MqttClient &mqtt)
 {
-    auto names = registry.listNames();
+    auto sensors = registry.list();
 
     std::string result = "[";
-    for (size_t i = 0; i < names.size(); ++i)
+    for (size_t i = 0; i < sensors.size(); ++i)
     {
-        result += "\"" + names[i] + "\"";
-        if (i < names.size() - 1)
+        const auto &s = sensors[i];
+        result += "{\"name\":\"" + s->name() + "\",\"type\":\"" + s->type() + "\"}";
+        if (i < sensors.size() - 1)
             result += ",";
     }
     result += "]";
