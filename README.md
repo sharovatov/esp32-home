@@ -10,6 +10,7 @@ A lightweight system for remotely checking on the flat — including temperature
 This project uses an ESP32 device equipped with:
 - A camera ([OV5640](https://cdn.sparkfun.com/datasheets/Sensors/LightImaging/OV5640_datasheet.pdf))
 - A temperature and humidity sensor ([DHT11](https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf))
+- A passive buzzer
 
 The ESP32 connects to the home Wi-Fi and communicates via my own MQTT broker, providing access to real-time sensor data and user-triggered updates.
 
@@ -23,10 +24,18 @@ The ESP32 connects to the home Wi-Fi and communicates via my own MQTT broker, pr
   The ESP32 publishes a JSON list of currently available sensors.  
   Example payload:
   ```json
-  ["humidity", "temperature", "camera"]
+  [
+    { "name": "temp", "type": "text/plain" },
+    { "name": "humidity", "type": "text/plain" },
+    { "name": "air_quality", "type": "text/plain" },
+    { "name": "camera", "type": "image/jpeg" }
+  ]
   ```
 
+Clients subscribe to this topic on connect and use the metadata to dynamically render controls and correctly display responses.
+
 ---
+
 
 ### Requesting Sensor Data
 
@@ -38,8 +47,11 @@ The ESP32 connects to the home Wi-Fi and communicates via my own MQTT broker, pr
   ```
   esp32/request/camera      → triggers a new photo capture  
   esp32/request/humidity    → triggers humidity reading  
-  esp32/request/temperature → triggers temperature reading
+  esp32/request/air_quality → triggers air quality percentage
+  esp32/request/temp        → triggers temperature reading
   ```
+
+The ESP32 will buzz once to confirm reception of any valid or invalid request.
 
 ---
 
@@ -48,15 +60,16 @@ The ESP32 connects to the home Wi-Fi and communicates via my own MQTT broker, pr
 - `esp32/response/<sensorName>`  
   ESP32 publishes sensor results to this topic.
 
+  - Topic pattern: esp32/response/<sensorName>
+  - Payload: Value returned by the sensor
+
   #### Example payloads:
-
-  - **Camera (`esp32/response/camera`)**:  
-    Base64-encoded image string  
-    *(The receiving client is expected to render it as an image)*
-
-  - **Humidity**: `69.60`
-
-  - **Temperature**: `23.5`
+  ```
+  esp32/response/temp: "23.5"
+  esp32/response/humidity: "69.6"
+  esp32/response/air_quality: "47"
+  esp32/response/camera: (Base64-encoded JPEG string)
+  ```
 
 ---
 
@@ -65,30 +78,35 @@ The ESP32 connects to the home Wi-Fi and communicates via my own MQTT broker, pr
 - `esp32/response/error`  
   Any malformed requests, unavailable sensors, or failures are published here.
 
-  #### Example payload: `Unknown sensor: sound`
+  #### Example payload:
+  ```
+  sensor_unknown:airflow
+  invalid_topic:bad/request/humidity
+  ```
 
 ---
 
 ## 💻 Web Client
 
 The frontend is a static HTML + JavaScript page that:
-- Connects to the same MQTT broker via WebSocket
-- Subscribes to `esp32/available_sensors` and all `esp32/response/#` topics
-- Displays each sensor and a "Refresh" button
-- Sends sensor requests via MQTT on button click
-- Renders live sensor values or error messages
+- Connects to the MQTT broker via WebSocket
+- Subscribes to `esp32/available_sensors` and `esp32/response/#` topics
+- Renders one button per available sensor using metadata from `available_sensors`
+- Sends requests via MQTT on button click
+- Displays each result dynamically based on the sensor type (text/plain or image/jpeg)
+
+The client is fully decoupled from the ESP32 implementation. It relies exclusively on metadata provided via MQTT.
 
 ---
 
 ## 🧪 Development & Testing
 
-The core logic of the system is developed using **Test-Driven Development (TDD)**:
+All ESP32 code is developed using Test-Driven Development (TDD) with separation of logic and hardware:
 
-- Logic is written and tested locally using PlatformIO’s `native` environment
-- Tests use the Unity test framework
-- Hardware and integration behaviour is added incrementally once core logic is verified
-
-Sensor handling, message formatting, encoding, and MQTT dispatching are all tested independently of hardware.
+- Business logic is tested with PlatformIO’s `native` environment
+-	ESP32-specific components are tested in esp32 integration tests
+- All sensors are represented by test doubles (fakes/stubs) for isolated testing
+- Sensor registry, MQTT dispatch, message structure, and system boot logic are tested without hardware
 
 ### 🧭 ESP32 GPIO Usage Overview
 
