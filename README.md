@@ -1,4 +1,4 @@
-# ESP32 Flat Monitor
+# ESP32 Weather Monitor
 
 A lightweight system for remotely checking on the flat — including temperature, humidity, and camera snapshots — using an ESP32, MQTT, and a simple web client.
 
