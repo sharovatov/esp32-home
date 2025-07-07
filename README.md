@@ -7,6 +7,7 @@ A lightweight weather monitoring system that tracks temperature, humidity, air q
 This project uses an ESP32 device equipped with:
 - A camera ([OV5640](https://cdn.sparkfun.com/datasheets/Sensors/LightImaging/OV5640_datasheet.pdf))
 - A temperature and humidity sensor ([DHT11](https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf))
+- An air quality sensor ([MQ-135](https://www.winsen-sensor.com/d/files/PDF/Electrochemical%20Gas%20Sensor/MQ-135.pdf))
 - A passive buzzer
 
 The ESP32 currently connects to the local Wi-Fi network and communicates via my own MQTT broker, providing access to real-time weather data and user-triggered updates. Soon it will transition to using a SIM7670 3G module for cellular connectivity.
