@@ -1,0 +1,1 @@
+/Users/vitaliysharovatov/Documents/qase-cpp-unity-reporter/include/qase_reporter.h

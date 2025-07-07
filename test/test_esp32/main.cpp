@@ -21,6 +21,50 @@ bool mqttMessageReceived = false;
 String mqttReceivedTopic;
 String mqttReceivedMessage;
 
+#include <ctime>
+#include "qase_reporter.h"
+#include <WiFiClientSecure.h>
+#include <HTTPClient.h>
+
+struct EspHttpClient : public qase::HttpClient
+{
+    std::string post(const std::string &url,
+                     const std::string &payload,
+                     const std::vector<std::string> &headers) override
+    {
+        if (url.rfind("https://", 0) != 0)
+        {
+            throw std::runtime_error("Only https:// URLs are supported");
+        }
+
+        HTTPClient http;
+        http.begin(url.c_str()); // Automatically handles HTTPS via WiFiClientSecure internally
+
+        for (const auto &h : headers)
+        {
+            auto sep = h.find(':');
+            if (sep != std::string::npos)
+            {
+                auto key = h.substr(0, sep);
+                auto val = h.substr(sep + 1);
+                http.addHeader(key.c_str(), val.c_str());
+            }
+        }
+
+        int httpCode = http.POST(payload.c_str());
+        if (httpCode < 0)
+        {
+            http.end();
+            throw std::runtime_error("HTTP POST failed: " + std::string(http.errorToString(httpCode).c_str()));
+        }
+
+        String response = http.getString();
+        http.end();
+
+        return std::string(response.c_str());
+    }
+};
+
 void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
 {
     mqttReceivedTopic = String(topic);
@@ -143,17 +187,46 @@ void setup()
 {
     Serial.begin(115200);
     delay(2000); // Wait for serial monitor to connect
-    UNITY_BEGIN();
+    QASE_UNITY_BEGIN();
 
-    RUN_TEST(test_temperature_sensor_reads_value);
+    QASE_RUN_TEST(test_temperature_sensor_reads_value);
     delay(100); // needed for dht11 since it's slow
-    RUN_TEST(test_humidity_sensor_reads_value);
-    RUN_TEST(test_wifi_connects_successfully);
-    RUN_TEST(test_mqtt_publish_and_receive);
-    RUN_TEST(test_camera_returns_base64_string);
-    RUN_TEST(test_mq135_sensor_reads_percentage);
+    QASE_RUN_TEST(test_humidity_sensor_reads_value);
+    QASE_RUN_TEST(test_wifi_connects_successfully);
+    QASE_RUN_TEST(test_mqtt_publish_and_receive);
+    QASE_RUN_TEST(test_camera_returns_base64_string);
+    QASE_RUN_TEST(test_mq135_sensor_reads_percentage);
 
-    UNITY_END();
+    Serial.println("MAIN.CPP: tests are run, now we need to finish");
+
+    EspHttpClient http;
+
+    connectToWiFi();
+
+    Serial.println("MAIN.CPP: connected to wifi, will now init QaseConfig");
+
+    qase::QaseConfig cfg;
+    cfg.token = "4a02e17acfa32e7b71067e3beb597490f8a9bda427697c2a3bf49044582ee668";
+    cfg.project = "ET1";
+    cfg.host = "api.qase.io";
+    cfg.run_title = "e2e tests";
+
+    qase::ConfigResolutionInput input;
+    input.preset = cfg;
+
+    cfg = resolve_config(input);
+
+    Serial.println("MAIN.CPP: config inited, will call QASE_UNITY_END now");
+
+    try
+    {
+        QASE_UNITY_END(http, cfg);
+    }
+    catch (const std::exception &e)
+    {
+        Serial.println("Qase reporter failed:");
+        Serial.println(e.what());
+    }
 }
 
 void loop() {}
