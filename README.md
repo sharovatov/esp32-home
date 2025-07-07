@@ -1,6 +1,6 @@
-# ESP32 Flat Monitor
+# ESP32 Weather Station
 
-A lightweight system for remotely checking on the flat — including temperature, humidity, and camera snapshots — using an ESP32, MQTT, and a simple web client.
+A lightweight weather monitoring system that tracks temperature, humidity, air quality, and provides camera snapshots — using an ESP32, MQTT, and a simple web client.
 
 ## Overview
 
@@ -9,7 +9,7 @@ This project uses an ESP32 device equipped with:
 - A temperature and humidity sensor ([DHT11](https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf))
 - A passive buzzer
 
-The ESP32 connects to the home Wi-Fi and communicates via my own MQTT broker, providing access to real-time sensor data and user-triggered updates.
+The ESP32 currently connects to the local Wi-Fi network and communicates via my own MQTT broker, providing access to real-time weather data and user-triggered updates. Soon it will transition to using a SIM7670 3G module for cellular connectivity.
 
 ## MQTT Interface
 
@@ -101,7 +101,7 @@ All ESP32 code is developed using Test-Driven Development (TDD) with separation 
 | 4    | ❌ Occupied  | Camera        | D0                                               |
 | 5    | ❌ Occupied  | Camera        | D1                                               |
 | 12   | ⚠️ Caution   | -             | Must be LOW on boot — strapping pin              |
-| 13   | ❌ Occupied  | ADC2          | Wifi uses ADC2, so no reading when Wifi=on       |
+| 13   | ❌ Occupied  | ADC2          | WiFi uses ADC2, so no reading when WiFi=on (will be freed when switching to 3G) |
 | 14   | ❌ Occupied  | Buzzer        | Passive buzzer signal                            |
 | 15   | ✅ Free      | -             | Often used for SPI CS                            |
 | 16   | ✅ Free      | -             | Can be used; UART2 RX                            |

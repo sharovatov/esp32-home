@@ -1,5 +1,6 @@
 #pragma once
 
+// TODO: This will be replaced with a CellularManager when transitioning to SIM7670 3G module
 class WiFiManager
 {
 public:

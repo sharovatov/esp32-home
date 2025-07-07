@@ -59,7 +59,7 @@ void setup()
 
   Serial.println("Booting device...");
 
-  // Connect WiFi
+  // Connect WiFi (will be replaced with SIM7670 3G module)
   RealWiFiManager wifi;
   if (!wifi.connect(WIFI_SSID, WIFI_PASSWORD))
   {
